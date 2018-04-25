@@ -10,13 +10,11 @@ coverage:
       default:
         target: 80%
 
-
-codecov:
-  branch: master
-
-comment:
-  layout: "diff"
-
 coverage:
   ignore:
     - "test/"
+
+comment:
+  layout: "header, diff"
+  require_changes: false
+  behavior: default
