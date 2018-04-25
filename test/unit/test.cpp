@@ -1,6 +1,8 @@
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-
-#include "lib.h"
-
 #include "catch.hpp"
 
+#include "loader-xerces.h"
+
+TEST_CASE( "Basic I/O", "[io]" ) {
+	auto loader = XercesSWIDTagLoader();
+	CHECK_THROWS( loader.load("") );
+}

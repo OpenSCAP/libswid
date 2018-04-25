@@ -5,11 +5,14 @@ project(libswid)
 ## file globbing ##############################################################
 ###############################################################################
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-file(GLOB_RECURSE sources      src/lib.cpp src/lib.h)
+file(GLOB_RECURSE sources      src/l*.cpp src/*.h)
 file(GLOB_RECURSE sources_test test/unit/*.cpp)
 # You can use set(sources src/main.cpp) etc if you don't want to
 # use globbing to find files automatically.
+
+find_package(XercesC)
 
 ###############################################################################
 ## target definitions #########################################################
@@ -31,6 +34,9 @@ target_link_libraries(swid-util libswid)
 
 target_compile_options(libswid PUBLIC -std=c++11 -Wall)
 
+target_include_directories(libswid PUBLIC src ${XercesC_INCLUDE_DIRS})
+target_link_libraries(libswid ${XercesC_LIBRARIES})
+
 # This copies all resource files in the build directory.
 # We need this, because we want to work with paths relative to the executable.
 file(COPY ${data} DESTINATION resources)
@@ -51,7 +57,6 @@ target_link_libraries(swid-util PUBLIC
 ## testing ####################################################################
 ###############################################################################
 
-
 add_executable(unit_tests ${sources_test} ${sources})
 
 # This define is added to prevent collision with the main.
@@ -63,13 +68,9 @@ target_include_directories(unit_tests PUBLIC src)
 
 target_link_libraries(unit_tests PUBLIC libswid)
 
-target_include_directories(unit_tests PUBLIC)
-
 include (CTest)
 
 add_test ("Unit" unit_tests)
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(codecov)
 add_coverage(libswid)
@@ -77,7 +78,6 @@ add_coverage(unit_tests)
 list(APPEND LCOV_REMOVE_PATTERNS "'/usr/*'")
 list(APPEND LCOV_REMOVE_PATTERNS "'${PROJECT_SOURCE_DIR}/test/*'")
 coverage_evaluate()
-
 
 
 ###############################################################################
