@@ -20,7 +20,7 @@ after_success:
 
 addons:
   sonarcloud:
-    organization: "matejak-github"
+    organization: "openscap"
 
   coverity_scan:
     project:
