@@ -1,4 +1,9 @@
 # libswid
+
+[![Build Status](https://travis-ci.org/OpenSCAP/libswid.svg?branch=master)](https://travis-ci.org/OpenSCAP/libswid)
+[![codecov](https://codecov.io/gh/OpenSCAP/libswid/branch/master/graph/badge.svg)](https://codecov.io/gh/OpenSCAP/libswid)
+[![Sonar Cloud](https://sonarcloud.io/api/project_badges/measure?project=openscap-libswid&metric=alert_status)](https://sonarcloud.io/dashboard?id=openscap-libswid)
+
 Library for interfacing with SWID tags
 
 ## Build
