@@ -47,7 +47,14 @@ file(COPY ${data} DESTINATION resources)
 ## testing ####################################################################
 ###############################################################################
 
-add_executable(unit_tests ${sources_test})
+add_executable(unit_tests ${sources_test} ${sources})
+
+# Don't include libswid as a library, use sources.
+# Not having explicit sources would destroy the coverage analysis.
+#
+# add_executable(unit_tests ${sources_test})
+# target_link_libraries(unit_tests PUBLIC libswid)
+target_link_libraries(unit_tests ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
 
 # This define is added to prevent collision with the main.
 # It might be better solved by not adding the source with the main to the
@@ -55,8 +62,6 @@ add_executable(unit_tests ${sources_test})
 target_compile_definitions(unit_tests PUBLIC UNIT_TESTS)
 
 target_include_directories(unit_tests PUBLIC src)
-
-target_link_libraries(unit_tests PUBLIC libswid)
 
 include (CTest)
 

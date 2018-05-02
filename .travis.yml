@@ -7,6 +7,7 @@ before_install:
 script:
  - export CC=gcc-7
  - export CXX=g++-7
+ - export GCOV=gcov-7
  - cmake -DENABLE_COVERAGE=yes . && build-wrapper-linux-x86-64 --out-dir bw-output make clean all
  - make && ctest -V
  - make gcov
