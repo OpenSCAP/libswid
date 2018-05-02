@@ -62,3 +62,42 @@ string Role::RoleAsString() const {
 role_id Role::RoleAsId() const {
 	return role;
 }
+
+
+const char * XML_TRUE = "true";
+const char * XML_FALSE = "false";
+
+
+static bool check_bool(const char * value) {
+	if (strcmp(XML_TRUE, value) == 0) {
+		return true;
+	}
+	return false;
+}
+
+
+type_id determine_type_id(const char * corpus, const char * patch, const char * supplemental) {
+	type_id type = SWID_TYPE_PRIMARY;
+	if (check_bool(corpus)) {
+		type = SWID_TYPE_CORPUS;
+	} else if (check_bool(patch)) {
+		type = SWID_TYPE_PATCH;
+	} else if (check_bool(supplemental)) {
+		type = SWID_TYPE_SUPPLEMENTAL;
+	}
+	return type;
+}
+
+
+void set_strings_to_match_type(const type_id & type, string & corpus, string & patch, string & supplemental) {
+	corpus = XML_FALSE;
+	patch = XML_FALSE;
+	supplemental = XML_FALSE;
+	if (type == SWID_TYPE_CORPUS) {
+		corpus = XML_TRUE;
+	} else if (type == SWID_TYPE_PATCH) {
+		patch = XML_TRUE;
+	} else if (type == SWID_TYPE_SUPPLEMENTAL) {
+		supplemental = XML_TRUE;
+	}
+}

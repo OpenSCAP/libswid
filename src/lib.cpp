@@ -25,9 +25,17 @@
 #include "lib.h"
 
 
-SWIDTagLoader::SWIDTagLoader() {
+XMLReadError::XMLReadError(const std::string & what_arg):std::runtime_error(what_arg) {
 }
 
 
-SWIDTagLoader::~SWIDTagLoader() {
+XMLReadError::XMLReadError(const char * what_arg):std::runtime_error(what_arg) {
+}
+
+
+SWIDTagIO::SWIDTagIO() {
+}
+
+
+SWIDTagIO::~SWIDTagIO() {
 }

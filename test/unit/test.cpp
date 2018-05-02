@@ -38,7 +38,7 @@ TEST_CASE( "Utilities" ) {
 
 
 TEST_CASE( "Basic I/O", "[io]" ) {
-	auto loader = TiXML2SWIDTagLoader();
+	auto loader = TiXMLSWIDTagIO();
 	CHECK_THROWS( loader.load("") );
 	SWIDStruct swid;
 
