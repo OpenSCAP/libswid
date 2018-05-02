@@ -24,6 +24,8 @@
 
 #include "lib.h"
 
+#include "loader-xerces.h"
+#include "loader-tinyxml.h"
 
 XMLReadError::XMLReadError(const std::string & what_arg):std::runtime_error(what_arg) {
 }
@@ -38,4 +40,14 @@ SWIDTagIO::SWIDTagIO() {
 
 
 SWIDTagIO::~SWIDTagIO() {
+}
+
+
+SWIDTagIO * get_a_swidtagio(const char * type) {
+	if (strcmp(type, "tinyxml") == 0) {
+		return new TiXMLSWIDTagIO();
+	} else if (strcmp(type, "xerces") == 0) {
+		return new XercesSWIDTagIO();
+	}
+	return NULL;
 }
