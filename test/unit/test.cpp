@@ -37,13 +37,14 @@ TEST_CASE( "Utilities" ) {
 }
 
 
-TEST_CASE( "Basic I/O", "[io]" ) {
-	auto loader = TiXMLSWIDTagIO();
-	CHECK_THROWS( loader.load("") );
+TEST_CASE( "Basic I/O", "[tinyxml]" ) {
+	auto * loader = get_a_swidtagio("tinyxml");
+	CHECK_THROWS( loader->load("") );
 	SWIDStruct swid;
 
 	swid.name = "ACME RoadRunner Management Suite";
 	swid.tagId = "com.acme.rms-ce-v4-1-5-0";
+	const char * fname = "foo.xml";
 
 	SWIDEntity entity;
 	entity.name = "The ACME corporation";
@@ -54,9 +55,9 @@ TEST_CASE( "Basic I/O", "[io]" ) {
 	SECTION("Basic metadata") {
 		swid.type = SWID_TYPE_CORPUS;
 
-		loader.save("foo.xml", swid);
+		loader->save(fname, swid);
 
-		auto loaded_swid = loader.load("foo.xml");
+		auto loaded_swid = loader->load(fname);
 		REQUIRE( loaded_swid.name == swid.name );
 		REQUIRE( loaded_swid.tagId == swid.tagId );
 		REQUIRE( loaded_swid.type == swid.type );
@@ -70,9 +71,9 @@ TEST_CASE( "Basic I/O", "[io]" ) {
 		entity2.role = Role("distributor").RoleAsId();
 		swid.entities.push_back(entity2);
 
-		loader.save("foo.xml", swid);
+		loader->save(fname, swid);
 
-		loaded_swid = loader.load("foo.xml");
+		loaded_swid = loader->load(fname);
 
 		REQUIRE( loaded_swid.entities.size() == 2 );
 		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
@@ -82,22 +83,89 @@ TEST_CASE( "Basic I/O", "[io]" ) {
 	SECTION("Tag types") {
 		swid.type = SWID_TYPE_PRIMARY;
 
-		loader.save("foo.xml", swid);
+		loader->save(fname, swid);
 
-		auto loaded_swid = loader.load("foo.xml");
+		auto loaded_swid = loader->load(fname);
 		REQUIRE( loaded_swid.type == swid.type );
 
 		swid.type = SWID_TYPE_SUPPLEMENTAL;
-		loader.save("foo.xml", swid);
+		loader->save(fname, swid);
 
-		loaded_swid = loader.load("foo.xml");
+		loaded_swid = loader->load(fname);
 		REQUIRE( loaded_swid.type == swid.type );
 
 		swid.type = SWID_TYPE_PATCH;
-		loader.save("foo.xml", swid);
+		loader->save(fname, swid);
 
-		loaded_swid = loader.load("foo.xml");
+		loaded_swid = loader->load(fname);
 		REQUIRE( loaded_swid.type == swid.type );
 	}
+	delete loader;
+}
 
+
+TEST_CASE( "Basic I/O 2", "[xerces]" ) {
+	auto * loader = get_a_swidtagio("xerces");
+	CHECK_THROWS( loader->load("") );
+	SWIDStruct swid;
+
+	swid.name = "ACME RoadRunner Management Suite";
+	swid.tagId = "com.acme.rms-ce-v4-1-5-0";
+	const char * fname = "bar.xml";
+
+	SWIDEntity entity;
+	entity.name = "The ACME corporation";
+	entity.role = Role(SWID_ROLE_SOFTWARE_CREATOR | SWID_ROLE_TAG_CREATOR).RoleAsId();
+
+	swid.entities.push_back(entity);
+
+	SECTION("Basic metadata") {
+		swid.type = SWID_TYPE_CORPUS;
+
+		loader->save(fname, swid);
+
+		auto loaded_swid = loader->load(fname);
+		REQUIRE( loaded_swid.name == swid.name );
+		REQUIRE( loaded_swid.tagId == swid.tagId );
+		REQUIRE( loaded_swid.type == swid.type );
+
+		REQUIRE( loaded_swid.entities.size() == 1 );
+		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
+
+
+		SWIDEntity entity2;
+		entity2.name = "Red Hat";
+		entity2.role = Role("distributor").RoleAsId();
+		swid.entities.push_back(entity2);
+
+		loader->save(fname, swid);
+
+		loaded_swid = loader->load(fname);
+
+		REQUIRE( loaded_swid.entities.size() == 2 );
+		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
+		REQUIRE( loaded_swid.entities[1] == swid.entities[1] );
+	}
+
+	SECTION("Tag types") {
+		swid.type = SWID_TYPE_PRIMARY;
+
+		loader->save(fname, swid);
+
+		auto loaded_swid = loader->load(fname);
+		REQUIRE( loaded_swid.type == swid.type );
+
+		swid.type = SWID_TYPE_SUPPLEMENTAL;
+		loader->save(fname, swid);
+
+		loaded_swid = loader->load(fname);
+		REQUIRE( loaded_swid.type == swid.type );
+
+		swid.type = SWID_TYPE_PATCH;
+		loader->save(fname, swid);
+
+		loaded_swid = loader->load(fname);
+		REQUIRE( loaded_swid.type == swid.type );
+	}
+	delete loader;
 }
