@@ -7,13 +7,13 @@
 using namespace xercesc;
 
 
-class XercesSWIDTagLoader: public SWIDTagLoader
+class XercesSWIDTagIO: public SWIDTagIO
 {
 public:
-	XercesSWIDTagLoader();
-	virtual ~XercesSWIDTagLoader() override;
-	virtual SWIDStruct load(const string & filename) override;
-	virtual void save(const string & filename, const SWIDStruct & what) override;
+	XercesSWIDTagIO();
+	virtual ~XercesSWIDTagIO() override;
+	virtual SWIDStruct load(const std::string & filename) override;
+	virtual void save(const std::string & filename, const SWIDStruct & what) override;
 
 private:
 	void deleteParser();

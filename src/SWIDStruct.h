@@ -19,6 +19,8 @@ enum role_id {
 		= 1 << 4
 };
 
+
+// Took from https://stackoverflow.com/a/1448478/592892
 inline role_id operator | (role_id a, role_id b)
 {return static_cast<role_id>(static_cast<int>(a) | static_cast<int>(b));}
 

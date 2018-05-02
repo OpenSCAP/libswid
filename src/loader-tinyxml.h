@@ -5,15 +5,11 @@
 #include <tinyxml.h>
 
 
-class TiXML2SWIDTagLoader: public SWIDTagLoader
+class TiXMLSWIDTagIO: public SWIDTagIO
 {
 public:
-	TiXML2SWIDTagLoader();
-	virtual ~TiXML2SWIDTagLoader() override;
-	virtual SWIDStruct load(const string & filename) override;
-	virtual void save(const string & filename, const SWIDStruct & what) override;
-
-private:
-	const char * bool_to_string(bool) const;
-	bool check_bool(const char *) const;
+	TiXMLSWIDTagIO();
+	virtual ~TiXMLSWIDTagIO() override;
+	virtual SWIDStruct load(const std::string & filename) override;
+	virtual void save(const std::string & filename, const SWIDStruct & what) override;
 };

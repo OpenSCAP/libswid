@@ -9,9 +9,10 @@
 
 
 using std::ostringstream;
+using std::string;
 
 
-XercesSWIDTagLoader::XercesSWIDTagLoader():SWIDTagLoader() {
+XercesSWIDTagIO::XercesSWIDTagIO():SWIDTagIO() {
 	try {
 		XMLPlatformUtils::Initialize();
 	}
@@ -27,7 +28,7 @@ XercesSWIDTagLoader::XercesSWIDTagLoader():SWIDTagLoader() {
 }
 
 
-XercesSWIDTagLoader::~XercesSWIDTagLoader() {
+XercesSWIDTagIO::~XercesSWIDTagIO() {
 	if (parser != NULL) {
 		deleteParser();
 	}
@@ -35,7 +36,7 @@ XercesSWIDTagLoader::~XercesSWIDTagLoader() {
 }
 
 
-SWIDStruct XercesSWIDTagLoader::load(const string & filename) {
+SWIDStruct XercesSWIDTagIO::load(const string & filename) {
 	if (parser != NULL) {
 		deleteParser();
 	}
@@ -47,13 +48,13 @@ SWIDStruct XercesSWIDTagLoader::load(const string & filename) {
 }
 
 
-void XercesSWIDTagLoader::deleteParser() {
+void XercesSWIDTagIO::deleteParser() {
 	delete parser;
 	parser = NULL;
 }
 
 
-void XercesSWIDTagLoader::createParser() {
+void XercesSWIDTagIO::createParser() {
 	parser = new XercesDOMParser();
 
 	parser->setValidationScheme(XercesDOMParser::Val_Always);
@@ -64,7 +65,7 @@ void XercesSWIDTagLoader::createParser() {
 }
 
 
-void XercesSWIDTagLoader::save(const string & filename, const SWIDStruct & what) {
+void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
 	if (parser != NULL) {
 		deleteParser();
 	}
