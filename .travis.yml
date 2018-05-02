@@ -1,16 +1,12 @@
 language: cpp
-dist: xenial
-
-env:
- global:
-   # Coverity CI token
-   - secure: "tWJYsMt8w9PIUTpjLfYD+ZQp3MshSsYjrjpPr1vZwMCAgmUkDlfZji22O966QvYFTSEcLoZGPZP5HAxZ3ho4AnwdPRcF1SlLg/ZyF2A0MOvWJ9QJOrdtsjERTOUBT31M/FGVKc7EYmW6b0wBmFG+1tzZ0hADKAoyRuabDo/xT134x3xAvR61EVbbe7+YCD496WvpdD3u9qDpbOO8ro2R0cwOEH6JdVcbw7Q7YLLFFAOV4kHhvb5GdC5Wc7syoraUCOeR0vEiPynUsxuQS6AkO5FkGkB+otpBXu495MyXjIX5tOzNeFmSvgmjypdlDO6CKqaLRHKyfnaAQvjAh53wuDQJ7XPEQVqyoA60/DretooVZxNFGbP5Yqhv45/texlfbLzPMOKnmNcZ30qF+DyA/F/xmnJX9waym8S5qSjIiY7CAShA1BzGOx0B76NObkY61N4pxATbrwwvKIcD5q2fM/KUiTdgn6RclYpNIJA8jHAAVqf+W9BRcSLwkiSujRGnnhzUj38dqfkmZEENgFwdxUhmotx0eONBvD4BznPXNJT2cm1Rj8ZJwpSzUa8HstUmzzQ+jS1iY1JaG4WlHUiZLiI4jkVjjBTw0b48zVE6YriJKqFSnSh6MF8Ixr19OGz1nCRmZn4gwK5aZj1N/AkljiXs3/QDUWobDiSZi1OhzTM="
 
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq libxerces-c-dev libtinyxml-dev
 
 script:
+ - export CC=gcc-7
+ - export CXX=g++-7
  - cmake -DENABLE_COVERAGE=yes . && build-wrapper-linux-x86-64 --out-dir bw-output make clean all
  - make && ctest -V
  - make gcov
@@ -20,15 +16,15 @@ after_success:
  - bash <(curl -s https://codecov.io/bash)
 
 addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-7
+      - g++-7
+
   sonarcloud:
     organization: "openscap"
-
-  coverity_scan:
-    project:
-      name: "matejak/libswid"
-    build_command_prepend: "mkdir build && cd build && cmake .."
-    build_command: "make"
-    branch_pattern: xxx
 
 cache:
   directories:
