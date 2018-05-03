@@ -4,6 +4,8 @@
 #include "loader-tinyxml.h"
 #include "Translator.h"
 
+using std::string;
+
 
 TEST_CASE( "Utilities" ) {
 	SECTION("Role parsing") {
@@ -37,14 +39,15 @@ TEST_CASE( "Utilities" ) {
 }
 
 
-TEST_CASE( "Basic I/O", "[tinyxml]" ) {
-	auto * loader = get_a_swidtagio("tinyxml");
+void check(string parser_name) {
+	auto * loader = get_a_swidtagio(parser_name.c_str());
 	CHECK_THROWS( loader->load("") );
 	SWIDStruct swid;
 
 	swid.name = "ACME RoadRunner Management Suite";
 	swid.tagId = "com.acme.rms-ce-v4-1-5-0";
-	const char * fname = "foo.xml";
+	string fname = parser_name;
+	fname += ".xml";
 
 	SWIDEntity entity;
 	entity.name = "The ACME corporation";
@@ -52,7 +55,7 @@ TEST_CASE( "Basic I/O", "[tinyxml]" ) {
 
 	swid.entities.push_back(entity);
 
-	SECTION("Basic metadata") {
+	SECTION(parser_name + ": Basic metadata") {
 		swid.type = SWID_TYPE_CORPUS;
 
 		loader->save(fname, swid);
@@ -80,7 +83,7 @@ TEST_CASE( "Basic I/O", "[tinyxml]" ) {
 		REQUIRE( loaded_swid.entities[1] == swid.entities[1] );
 	}
 
-	SECTION("Tag types") {
+	SECTION(parser_name + ": Tag types") {
 		swid.type = SWID_TYPE_PRIMARY;
 
 		loader->save(fname, swid);
@@ -104,68 +107,8 @@ TEST_CASE( "Basic I/O", "[tinyxml]" ) {
 }
 
 
-TEST_CASE( "Basic I/O 2", "[xerces]" ) {
-	auto * loader = get_a_swidtagio("xerces");
-	CHECK_THROWS( loader->load("") );
-	SWIDStruct swid;
-
-	swid.name = "ACME RoadRunner Management Suite";
-	swid.tagId = "com.acme.rms-ce-v4-1-5-0";
-	const char * fname = "bar.xml";
-
-	SWIDEntity entity;
-	entity.name = "The ACME corporation";
-	entity.role = Role(SWID_ROLE_SOFTWARE_CREATOR | SWID_ROLE_TAG_CREATOR).RoleAsId();
-
-	swid.entities.push_back(entity);
-
-	SECTION("Basic metadata") {
-		swid.type = SWID_TYPE_CORPUS;
-
-		loader->save(fname, swid);
-
-		auto loaded_swid = loader->load(fname);
-		REQUIRE( loaded_swid.name == swid.name );
-		REQUIRE( loaded_swid.tagId == swid.tagId );
-		REQUIRE( loaded_swid.type == swid.type );
-
-		REQUIRE( loaded_swid.entities.size() == 1 );
-		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
-
-
-		SWIDEntity entity2;
-		entity2.name = "Red Hat";
-		entity2.role = Role("distributor").RoleAsId();
-		swid.entities.push_back(entity2);
-
-		loader->save(fname, swid);
-
-		loaded_swid = loader->load(fname);
-
-		REQUIRE( loaded_swid.entities.size() == 2 );
-		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
-		REQUIRE( loaded_swid.entities[1] == swid.entities[1] );
-	}
-
-	SECTION("Tag types") {
-		swid.type = SWID_TYPE_PRIMARY;
-
-		loader->save(fname, swid);
-
-		auto loaded_swid = loader->load(fname);
-		REQUIRE( loaded_swid.type == swid.type );
-
-		swid.type = SWID_TYPE_SUPPLEMENTAL;
-		loader->save(fname, swid);
-
-		loaded_swid = loader->load(fname);
-		REQUIRE( loaded_swid.type == swid.type );
-
-		swid.type = SWID_TYPE_PATCH;
-		loader->save(fname, swid);
-
-		loaded_swid = loader->load(fname);
-		REQUIRE( loaded_swid.type == swid.type );
-	}
-	delete loader;
+TEST_CASE( "Basic I/O", "[parsers]" ) {
+	check("tinyxml");
+	check("xerces");
 }
+

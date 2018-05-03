@@ -4,8 +4,6 @@
 
 #include <xercesc/parsers/XercesDOMParser.hpp>
 
-using namespace xercesc;
-
 
 class XercesSWIDTagIO: public SWIDTagIO
 {
@@ -19,5 +17,6 @@ private:
 	void deleteParser();
 	void createParser();
 
-	XercesDOMParser * parser;
+	xercesc::XercesDOMParser * parser;
+	xercesc::ErrorHandler * errHandler;
 };
