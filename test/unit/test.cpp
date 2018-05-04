@@ -69,6 +69,10 @@ void check(string parser_name) {
 		REQUIRE( loaded_swid.type == swid.type );
 		REQUIRE( loaded_swid.xml_lang == swid.xml_lang );
 		REQUIRE( swid.version == loaded_swid.version );
+		REQUIRE( loaded_swid.versionScheme == string("") );
+
+		loaded_swid.applyDefaults();
+		REQUIRE( loaded_swid.versionScheme == string("multipartnumeric") );
 
 		REQUIRE( loaded_swid.entities.size() == 1 );
 		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
@@ -79,13 +83,24 @@ void check(string parser_name) {
 		entity2.role = Role("distributor").RoleAsId();
 		swid.entities.push_back(entity2);
 
+		swid.versionScheme = "semver";
+		swid.type = SWID_TYPE_PATCH;
+
+		SWIDLink link;
+		link.href = "swid.com.acme.rms-ce-v4-1-5-0";
+		link.rel = "patches";
+		swid.links.push_back(link);
+
 		loader->save(fname, swid);
 
 		loaded_swid = loader->load(fname);
 
+		REQUIRE( loaded_swid.links.size() == 1 );
+
 		REQUIRE( loaded_swid.entities.size() == 2 );
 		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
 		REQUIRE( loaded_swid.entities[1] == swid.entities[1] );
+		REQUIRE( loaded_swid.versionScheme == swid.versionScheme );
 	}
 
 	SECTION(parser_name + ": Tag types") {

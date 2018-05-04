@@ -24,7 +24,7 @@ role_id operator | (role_id a, role_id b);
 role_id operator & (role_id a, role_id b);
 
 
-enum link_rel_id {SWID_LINK_REL_COMPONENT, SWID_LINK_REL_PATCHES, SWID_LINK_REL_REQUIRES, SWID_LINK_REL_SUPERSEDES, SWID_LINK_REL_SUPPLEMENTAL, SWID_LINK_REL_ANY};
+// enum link_rel_id {SWID_LINK_REL_COMPONENT, SWID_LINK_REL_PATCHES, SWID_LINK_REL_REQUIRES, SWID_LINK_REL_SUPERSEDES, SWID_LINK_REL_SUPPLEMENTAL, SWID_LINK_REL_ANY};
 
 
 class SWIDEntity
@@ -34,12 +34,19 @@ public:
 	std::string regid;
 	role_id role;
 
-	bool operator == (const SWIDEntity & rhs) const
-	{
-		return name == rhs.name && role == rhs.role && regid == rhs.regid;
-	}
+	bool operator == (const SWIDEntity & rhs) const;
 };
 typedef std::vector<SWIDEntity> Entities;
+
+
+class SWIDLink
+{
+public:
+	std::string href;
+	std::string rel;
+	bool operator == (const SWIDLink & rhs) const;
+};
+typedef std::vector<SWIDLink> Links;
 
 
 class SWIDStruct
@@ -47,20 +54,16 @@ class SWIDStruct
 public:
 	SWIDStruct();
 
+	void applyDefaults();
+
 	std::string name;
 	std::string tagId;
 	std::string version;
+	std::string versionScheme;
 	std::string xml_lang;
 	/// Default tag type is "primary"
 	type_id type;
 
 	Entities entities;
-};
-
-
-class SWIDLink
-{
-public:
-	std::string href;
-	link_rel_id relation;
+	Links links;
 };

@@ -24,4 +24,6 @@ private:
 	xercesc::ErrorHandler * errHandler;
 
 	XMLCh * swid_ns;
+	XMLCh * xmlch_entity;
+	XMLCh * xmlch_link;
 };

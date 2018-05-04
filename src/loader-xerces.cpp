@@ -119,6 +119,8 @@ XercesSWIDTagIO::XercesSWIDTagIO():SWIDTagIO() {
 	parser = NULL;
 
 	swid_ns = X("http://standards.iso.org/iso/19770/-2/2015/schema.xsd");
+	xmlch_entity = X("Entity");
+	xmlch_link = X("Link");
 }
 
 
@@ -127,6 +129,8 @@ XercesSWIDTagIO::~XercesSWIDTagIO() {
 		deleteParser();
 	}
 
+	R(xmlch_link);
+	R(xmlch_entity);
 	R(swid_ns);
 
 	XMLPlatformUtils::Terminate();
@@ -149,6 +153,7 @@ SWIDStruct XercesSWIDTagIO::load(const string & filename) {
 	ret.name = extractAttrValue(pRoot, "name");
 	ret.tagId = extractAttrValue(pRoot, "tagId");
 	ret.version = extractAttrValue(pRoot, "version");
+	ret.versionScheme = extractAttrValue(pRoot, "versionScheme");
 	ret.xml_lang = extractAttrValue(pRoot, "xml:lang");
 
 	ret.type = determine_type_id(
@@ -159,11 +164,24 @@ SWIDStruct XercesSWIDTagIO::load(const string & filename) {
 	auto entity = SWIDEntity();
 	string role;
 	for (auto it = pRoot->getFirstElementChild(); it != NULL; it = it->getNextElementSibling()) {
+		if (XMLString::compareIString(it->getTagName(), xmlch_entity)) {
+			continue;
+		}
 		entity.name = extractAttrValue(it, "name");
 		entity.regid = extractAttrValue(it, "regid");
 		role = extractAttrValue(it, "role");
 		entity.role = Role(role).RoleAsId();
 		ret.entities.push_back(entity);
+	}
+
+	auto link = SWIDLink();
+	for (auto it = pRoot->getFirstElementChild(); it != NULL; it = it->getNextElementSibling()) {
+		if (XMLString::compareIString(it->getTagName(), xmlch_link)) {
+			continue;
+		}
+		link.href = extractAttrValue(it, "href");
+		link.rel = extractAttrValue(it, "rel");
+		ret.links.push_back(link);
 	}
 
 	return ret;
@@ -200,6 +218,7 @@ void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
 	setAttrValue(pRoot, "name", what.name);
 	setAttrValue(pRoot, "tagId", what.tagId);
 	setAttrValue(pRoot, "version", what.version);
+	setAttrValue(pRoot, "versionScheme", what.versionScheme);
 	setAttrValue(pRoot, "xml:lang", what.xml_lang);
 
 	string corpus, patch, supplemental;
@@ -208,15 +227,20 @@ void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
 	setAttrValue(pRoot, "patch", patch);
 	setAttrValue(pRoot, "supplemental", supplemental);
 
-	auto * xml_entity = X("Entity");
 	for (auto it = what.entities.begin(); it != what.entities.end(); it++) {
-		auto * entity_el = doc->createElementNS(swid_ns, xml_entity);
+		auto * entity_el = doc->createElementNS(swid_ns, xmlch_entity);
 		setAttrValue(entity_el, "name", it->name);
 		setAttrValue(entity_el, "regid", it->regid);
 		setAttrValue(entity_el, "role", Role(it->role).RoleAsString());
 		pRoot->appendChild(entity_el);
 	}
-	R(xml_entity);
+
+	for (auto it = what.links.begin(); it != what.links.end(); it++) {
+		auto * el = doc->createElementNS(swid_ns, xmlch_link);
+		setAttrValue(el, "href", it->href);
+		setAttrValue(el, "rel", it->rel);
+		pRoot->appendChild(el);
+	}
 
 	OutputXML(doc, filename);
 	doc->release();
