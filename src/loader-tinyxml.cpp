@@ -34,6 +34,7 @@ SWIDStruct TiXMLSWIDTagIO::load(const string & filename) {
 	ret.name = pRoot->Attribute("name");
 	ret.tagId = pRoot->Attribute("tagId");
 	ret.version = pRoot->Attribute("version");
+	ret.versionScheme = pRoot->Attribute("versionScheme");
 	ret.xml_lang = pRoot->Attribute("xml:lang");
 
 	ret.type = determine_type_id(
@@ -46,6 +47,12 @@ SWIDStruct TiXMLSWIDTagIO::load(const string & filename) {
 		const char * role = it->Attribute("role");
 		entity.role = Role(role).RoleAsId();
 		ret.entities.push_back(entity);
+	}
+	auto link = SWIDLink();
+	for (auto it = pRoot->FirstChildElement("Link"); it != NULL; it = it->NextSiblingElement("Link")) {
+		link.href = it->Attribute("href");
+		link.rel = it->Attribute("rel");
+		ret.links.push_back(link);
 	}
 
 	return ret;
@@ -62,6 +69,7 @@ void TiXMLSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
 	pRoot->SetAttribute("name", what.name.c_str());
 	pRoot->SetAttribute("tagId", what.tagId.c_str());
 	pRoot->SetAttribute("version", what.version.c_str());
+	pRoot->SetAttribute("versionScheme", what.versionScheme.c_str());
 	pRoot->SetAttribute("xml:lang", what.xml_lang.c_str());
 
 	string corpus, patch, supplemental;
@@ -76,6 +84,13 @@ void TiXMLSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
 		entity_el->SetAttribute("regid", it->regid.c_str());
 		entity_el->SetAttribute("role", Role(it->role).RoleAsString());
 		pRoot->LinkEndChild(entity_el);
+	}
+
+	for (auto it = what.links.begin(); it != what.links.end(); it++) {
+		auto * link_el = new TiXmlElement("Link");
+		link_el->SetAttribute("href", it->href.c_str());
+		link_el->SetAttribute("rel", it->rel.c_str());
+		pRoot->LinkEndChild(link_el);
 	}
 
 	doc.LinkEndChild(pRoot);
