@@ -13,6 +13,12 @@ TiXMLSWIDTagIO::~TiXMLSWIDTagIO() {
 }
 
 
+/*
+void add_entity(TiXMLNode * entity_node, std::vector<SWIDEntity>) {
+}
+*/
+
+
 SWIDStruct TiXMLSWIDTagIO::load(const string & filename) {
 	TiXmlDocument doc;
 
@@ -27,6 +33,8 @@ SWIDStruct TiXMLSWIDTagIO::load(const string & filename) {
 
 	ret.name = pRoot->Attribute("name");
 	ret.tagId = pRoot->Attribute("tagId");
+	ret.version = pRoot->Attribute("version");
+	ret.xml_lang = pRoot->Attribute("xml:lang");
 
 	ret.type = determine_type_id(
 		pRoot->Attribute("corpus"), pRoot->Attribute("patch"), pRoot->Attribute("supplemental"));
@@ -34,6 +42,7 @@ SWIDStruct TiXMLSWIDTagIO::load(const string & filename) {
 	auto entity = SWIDEntity();
 	for (auto it = pRoot->FirstChildElement("Entity"); it != NULL; it = it->NextSiblingElement("Entity")) {
 		entity.name = it->Attribute("name");
+		entity.regid = it->Attribute("regid");
 		const char * role = it->Attribute("role");
 		entity.role = Role(role).RoleAsId();
 		ret.entities.push_back(entity);
@@ -52,6 +61,8 @@ void TiXMLSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
 
 	pRoot->SetAttribute("name", what.name.c_str());
 	pRoot->SetAttribute("tagId", what.tagId.c_str());
+	pRoot->SetAttribute("version", what.version.c_str());
+	pRoot->SetAttribute("xml:lang", what.xml_lang.c_str());
 
 	string corpus, patch, supplemental;
 	set_strings_to_match_type(what.type, corpus, patch, supplemental);
@@ -62,6 +73,7 @@ void TiXMLSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
 	for (auto it = what.entities.begin(); it != what.entities.end(); it++) {
 		auto * entity_el = new TiXmlElement("Entity");
 		entity_el->SetAttribute("name", it->name.c_str());
+		entity_el->SetAttribute("regid", it->regid.c_str());
 		entity_el->SetAttribute("role", Role(it->role).RoleAsString());
 		pRoot->LinkEndChild(entity_el);
 	}

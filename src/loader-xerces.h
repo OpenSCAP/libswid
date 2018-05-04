@@ -17,6 +17,11 @@ private:
 	void deleteParser();
 	void createParser();
 
+	void setAttrValue(xercesc::DOMElement * el, const char * name, const std::string & value);
+	std::string extractAttrValue(xercesc::DOMElement * el, const char * name);
+
 	xercesc::XercesDOMParser * parser;
 	xercesc::ErrorHandler * errHandler;
+
+	XMLCh * swid_ns;
 };

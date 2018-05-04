@@ -62,8 +62,10 @@ private :
 // Taken from https://stackoverflow.com/a/2897419/592892
 static void OutputXML(DOMDocument * pmyDOMDocument, string filePath)
 {
+	auto * ls = X("LS");
 	//Return the first registered implementation that has the desired features. In this case, we are after a DOM implementation that has the LS feature... or Load/Save.
-	auto * implementation = DOMImplementationRegistry::getDOMImplementation(XMLString::transcode("LS"));
+	auto * implementation = DOMImplementationRegistry::getDOMImplementation(ls);
+	R(ls);
 
 	// Create a DOMLSSerializer which is used to serialize a DOM tree into an XML document.
 	auto * serializer = ((DOMImplementationLS*)implementation)->createLSSerializer();
@@ -72,14 +74,17 @@ static void OutputXML(DOMDocument * pmyDOMDocument, string filePath)
 	if (serializer->getDomConfig()->canSetParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true))
 		serializer->getDomConfig()->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true);
 
+	auto * xml_endl = X("\n");
 	// The end-of-line sequence of characters to be used in the XML being written out.
-	serializer->setNewLine(XMLString::transcode("\n"));
+	serializer->setNewLine(xml_endl);
 
 	// Convert the path into Xerces compatible XMLCh*.
 	auto * tempFilePath = X(filePath.c_str());
 
 	// Specify the target for the XML output.
 	auto * formatTarget = new LocalFileFormatTarget(tempFilePath);
+
+	R(tempFilePath);
 
 	// Create a new empty output destination object.
 	auto * output = ((DOMImplementationLS*)implementation)->createLSOutput();
@@ -93,6 +98,7 @@ static void OutputXML(DOMDocument * pmyDOMDocument, string filePath)
 	// Cleanup.
 	serializer->release();
 
+	R(xml_endl);
 	delete formatTarget;
 	output->release();
 }
@@ -111,6 +117,8 @@ XercesSWIDTagIO::XercesSWIDTagIO():SWIDTagIO() {
 		throw(msg.str());
 	}
 	parser = NULL;
+
+	swid_ns = X("http://standards.iso.org/iso/19770/-2/2015/schema.xsd");
 }
 
 
@@ -118,6 +126,9 @@ XercesSWIDTagIO::~XercesSWIDTagIO() {
 	if (parser != NULL) {
 		deleteParser();
 	}
+
+	R(swid_ns);
+
 	XMLPlatformUtils::Terminate();
 }
 
@@ -135,18 +146,22 @@ SWIDStruct XercesSWIDTagIO::load(const string & filename) {
 
 	auto ret = SWIDStruct();
 
-	ret.name = Y(pRoot->getAttribute(X("name")));
-	ret.tagId = Y(pRoot->getAttribute(X("tagId")));
+	ret.name = extractAttrValue(pRoot, "name");
+	ret.tagId = extractAttrValue(pRoot, "tagId");
+	ret.version = extractAttrValue(pRoot, "version");
+	ret.xml_lang = extractAttrValue(pRoot, "xml:lang");
 
 	ret.type = determine_type_id(
-		Y(pRoot->getAttribute(X("corpus"))),
-		Y(pRoot->getAttribute(X("patch"))),
-		Y(pRoot->getAttribute(X("supplemental"))));
+		extractAttrValue(pRoot, "corpus").c_str(),
+		extractAttrValue(pRoot, "patch").c_str(),
+		extractAttrValue(pRoot, "supplemental").c_str());
 
 	auto entity = SWIDEntity();
+	string role;
 	for (auto it = pRoot->getFirstElementChild(); it != NULL; it = it->getNextElementSibling()) {
-		entity.name = Y(it->getAttribute(X("name")));
-		const char * role = Y(it->getAttribute(X("role")));
+		entity.name = extractAttrValue(it, "name");
+		entity.regid = extractAttrValue(it, "regid");
+		role = extractAttrValue(it, "role");
 		entity.role = Role(role).RoleAsId();
 		ret.entities.push_back(entity);
 	}
@@ -175,31 +190,60 @@ void XercesSWIDTagIO::createParser() {
 
 
 void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
-	auto * implementation = DOMImplementationRegistry::getDOMImplementation(X("Core"));
+	auto * xml_core = X("Core");
+	auto * implementation = DOMImplementationRegistry::getDOMImplementation(xml_core);
 
-	auto * doc = implementation->createDocument(X("http://standards.iso.org/iso/19770/-2/2015/schema.xsd"), X("SoftwareIdentity"), 0);
+	auto * xml_swid = X("SoftwareIdentity");
+	auto * doc = implementation->createDocument(swid_ns, xml_swid, 0);
 	auto * pRoot = doc->getDocumentElement();
 
-	pRoot->setAttribute(X("name"), X(what.name.c_str()));
-	pRoot->setAttribute(X("tagId"), X(what.tagId.c_str()));
+	setAttrValue(pRoot, "name", what.name);
+	setAttrValue(pRoot, "tagId", what.tagId);
+	setAttrValue(pRoot, "version", what.version);
+	setAttrValue(pRoot, "xml:lang", what.xml_lang);
 
 	string corpus, patch, supplemental;
 	set_strings_to_match_type(what.type, corpus, patch, supplemental);
-	pRoot->setAttribute(X("corpus"), X(corpus.c_str()));
-	pRoot->setAttribute(X("patch"), X(patch.c_str()));
-	pRoot->setAttribute(X("supplemental"), X(supplemental.c_str()));
+	setAttrValue(pRoot, "corpus", corpus);
+	setAttrValue(pRoot, "patch", patch);
+	setAttrValue(pRoot, "supplemental", supplemental);
 
+	auto * xml_entity = X("Entity");
 	for (auto it = what.entities.begin(); it != what.entities.end(); it++) {
-		auto * entity_el = doc->createElement(X("Entity"));
-		entity_el->setAttribute(X("name"), X(it->name.c_str()));
-		entity_el->setAttribute(X("role"), X(Role(it->role).RoleAsString().c_str()));
+		auto * entity_el = doc->createElementNS(swid_ns, xml_entity);
+		setAttrValue(entity_el, "name", it->name);
+		setAttrValue(entity_el, "regid", it->regid);
+		setAttrValue(entity_el, "role", Role(it->role).RoleAsString());
 		pRoot->appendChild(entity_el);
 	}
+	R(xml_entity);
 
 	OutputXML(doc, filename);
 	doc->release();
+	R(xml_swid);
+	R(xml_core);
 
 	if (false) {
 		// throw XMLReadError(doc.ErrorDesc());
 	}
+}
+
+
+void XercesSWIDTagIO::setAttrValue(DOMElement * el, const char * name, const string & value) {
+	auto * xml_name = X(name);
+	auto * xml_val = X(value.c_str());
+	el->setAttribute(xml_name, xml_val);
+	R(xml_val);
+	R(xml_name);
+}
+
+
+string XercesSWIDTagIO::extractAttrValue(DOMElement * el, const char * name) {
+	auto * xml_name = X(name);
+	auto * xml_val = el->getAttribute(xml_name);
+	const char * text_val = Y(xml_val);
+	string ret(text_val);
+	delete text_val;
+	R(xml_name);
+	return ret;
 }
