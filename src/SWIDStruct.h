@@ -20,12 +20,8 @@ enum role_id {
 };
 
 
-// Took from https://stackoverflow.com/a/1448478/592892
-inline role_id operator | (role_id a, role_id b)
-{return static_cast<role_id>(static_cast<int>(a) | static_cast<int>(b));}
-
-inline role_id operator & (role_id a, role_id b)
-{return static_cast<role_id>(static_cast<int>(a) & static_cast<int>(b));}
+role_id operator | (role_id a, role_id b);
+role_id operator & (role_id a, role_id b);
 
 
 enum link_rel_id {SWID_LINK_REL_COMPONENT, SWID_LINK_REL_PATCHES, SWID_LINK_REL_REQUIRES, SWID_LINK_REL_SUPERSEDES, SWID_LINK_REL_SUPPLEMENTAL, SWID_LINK_REL_ANY};
@@ -35,11 +31,12 @@ class SWIDEntity
 {
 public:
 	std::string name;
+	std::string regid;
 	role_id role;
 
 	bool operator == (const SWIDEntity & rhs) const
 	{
-		return name == rhs.name && role == rhs.role;
+		return name == rhs.name && role == rhs.role && regid == rhs.regid;
 	}
 };
 typedef std::vector<SWIDEntity> Entities;
@@ -48,8 +45,12 @@ typedef std::vector<SWIDEntity> Entities;
 class SWIDStruct
 {
 public:
+	SWIDStruct();
+
 	std::string name;
 	std::string tagId;
+	std::string version;
+	std::string xml_lang;
 	/// Default tag type is "primary"
 	type_id type;
 

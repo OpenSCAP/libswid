@@ -63,9 +63,14 @@ target_compile_definitions(unit_tests PUBLIC UNIT_TESTS)
 
 target_include_directories(unit_tests PUBLIC src)
 
+add_executable(resaver ${sources} test/integration/resaver.cpp)
+target_include_directories(resaver PUBLIC src)
+target_link_libraries(resaver PUBLIC ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
+
 include (CTest)
 
 add_test ("Unit" unit_tests)
+add_test ("Resaving" resaver)
 
 find_package(codecov)
 add_coverage(libswid)

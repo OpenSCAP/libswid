@@ -46,11 +46,14 @@ void check(string parser_name) {
 
 	swid.name = "ACME RoadRunner Management Suite";
 	swid.tagId = "com.acme.rms-ce-v4-1-5-0";
+	swid.version = "1.2.3";
+	swid.xml_lang = "en-us";
 	string fname = parser_name;
 	fname += ".xml";
 
 	SWIDEntity entity;
 	entity.name = "The ACME corporation";
+	entity.regid = "acme.com";
 	entity.role = Role(SWID_ROLE_SOFTWARE_CREATOR | SWID_ROLE_TAG_CREATOR).RoleAsId();
 
 	swid.entities.push_back(entity);
@@ -64,6 +67,8 @@ void check(string parser_name) {
 		REQUIRE( loaded_swid.name == swid.name );
 		REQUIRE( loaded_swid.tagId == swid.tagId );
 		REQUIRE( loaded_swid.type == swid.type );
+		REQUIRE( loaded_swid.xml_lang == swid.xml_lang );
+		REQUIRE( swid.version == loaded_swid.version );
 
 		REQUIRE( loaded_swid.entities.size() == 1 );
 		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
