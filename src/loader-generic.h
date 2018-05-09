@@ -13,6 +13,8 @@ template<class el_t>
 class XMLIO : public SWIDTagIO
 {
 public:
+	virtual ~XMLIO() override;
+
 	virtual SWIDStruct load(const std::string & filename) override;
 	virtual void save(const std::string & filename, const SWIDStruct & what) override;
 

@@ -7,21 +7,23 @@
 
 
 
-class XMLReadError : public std::runtime_error
+class XMLIOError : public std::runtime_error
 {
 public:
-	explicit XMLReadError(const std::string & what_arg);
-	explicit XMLReadError(const char * what_arg);
+	explicit XMLIOError(const std::string & what_arg);
+	explicit XMLIOError(const char * what_arg);
 };
 
 
-XMLReadError create_read_error(const std::string & filename, const std::string & what_happened);
-XMLReadError create_save_error(const std::string & filename, const std::string & what_happened);
+XMLIOError create_read_error(const std::string & filename, const std::string & what_happened);
+XMLIOError create_save_error(const std::string & filename, const std::string & what_happened);
 
 
 class SWIDTagIO
 {
 public:
+	virtual ~SWIDTagIO();
+
 	/**
 	 * Get a SWIDStruct instance from an XML file.
 	 */
