@@ -80,14 +80,14 @@ void XMLIO<el_t>::save(const std::string & filename, const SWIDStruct & what) {
 	setAttrValue(pRoot, "supplemental", supplemental);
 
 	for (auto it = what.entities.begin(); it != what.entities.end(); it++) {
-		el_t * el = createSubElement(pRoot, SWID_ELEMENT_ENTITY);;
+		el_t * el = createSubElement(pRoot, SWID_ELEMENT_ENTITY);
 		setAttrValue(el, "name", it->name);
 		setAttrValue(el, "regid", it->regid);
 		setAttrValue(el, "role", Role(it->role).RoleAsString());
 	}
 
 	for (auto it = what.links.begin(); it != what.links.end(); it++) {
-		el_t * el = createSubElement(pRoot, SWID_ELEMENT_LINK);;
+		el_t * el = createSubElement(pRoot, SWID_ELEMENT_LINK);
 		setAttrValue(el, "href", it->href);
 		setAttrValue(el, "rel", it->rel);
 	}
