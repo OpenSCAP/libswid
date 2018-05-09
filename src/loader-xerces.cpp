@@ -140,11 +140,11 @@ void XercesSWIDTagIO::createParser() {
 
 std::map<int, std::vector<DOMElement *> > XercesSWIDTagIO::subElementsOf(DOMElement * el) const {
 	auto result = createEmptyMap();
-	for (auto it = el->getFirstElementChild(); it != NULL; it = it->getNextElementSibling()) {
-		if (XMLString::compareIString(it->getTagName(), xmlch_entity) == 0) {
-			result[SWID_ELEMENT_ENTITY].push_back(it);
-		} else if (XMLString::compareIString(it->getTagName(), xmlch_link) == 0) {
-			result[SWID_ELEMENT_LINK].push_back(it);
+	for (auto * sub_el = el->getFirstElementChild(); sub_el != NULL; sub_el = sub_el->getNextElementSibling()) {
+		if (XMLString::compareIString(sub_el->getTagName(), xmlch_entity) == 0) {
+			result[SWID_ELEMENT_ENTITY].push_back(sub_el);
+		} else if (XMLString::compareIString(sub_el->getTagName(), xmlch_link) == 0) {
+			result[SWID_ELEMENT_LINK].push_back(sub_el);
 		}
 	}
 	return result;
