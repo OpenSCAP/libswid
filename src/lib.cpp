@@ -22,10 +22,16 @@
 
 // TODO: Make a script that inserts and updates the copyright claim in cpp files
 
+#include <sstream>
+
 #include "lib.h"
 
 #include "loader-xerces.h"
 #include "loader-tinyxml.h"
+
+
+using std::ostringstream;
+
 
 XMLReadError::XMLReadError(const std::string & what_arg):std::runtime_error(what_arg) {
 }
@@ -35,11 +41,23 @@ XMLReadError::XMLReadError(const char * what_arg):std::runtime_error(what_arg) {
 }
 
 
-SWIDTagIO::SWIDTagIO() {
+XMLReadError create_read_error(const std::string & filename, const std::string & what_happened) {
+	ostringstream msg;
+	msg << "Error loading from '";
+	msg << filename;
+	msg << "': ";
+	msg << what_happened;
+	return XMLReadError(msg.str());
 }
 
 
-SWIDTagIO::~SWIDTagIO() {
+XMLReadError create_save_error(const std::string & filename, const std::string & what_happened) {
+	ostringstream msg;
+	msg << "Error saving to '";
+	msg << filename;
+	msg << "': ";
+	msg << what_happened;
+	return XMLReadError(msg.str());
 }
 
 

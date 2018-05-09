@@ -3,8 +3,16 @@
 #include <string>
 #include <vector>
 
+
+/**
+ * SWID Tag Types
+ */
 enum type_id {SWID_TYPE_PRIMARY, SWID_TYPE_CORPUS, SWID_TYPE_PATCH, SWID_TYPE_SUPPLEMENTAL};
 
+
+/**
+ * SWID Entity Roles
+ */
 enum role_id {
 	SWID_ROLE_NONE = 0,
 	SWID_ROLE_AGGREGATOR
@@ -22,9 +30,6 @@ enum role_id {
 
 role_id operator | (role_id a, role_id b);
 role_id operator & (role_id a, role_id b);
-
-
-// enum link_rel_id {SWID_LINK_REL_COMPONENT, SWID_LINK_REL_PATCHES, SWID_LINK_REL_REQUIRES, SWID_LINK_REL_SUPERSEDES, SWID_LINK_REL_SUPPLEMENTAL, SWID_LINK_REL_ANY};
 
 
 class SWIDEntity
@@ -49,19 +54,28 @@ public:
 typedef std::vector<SWIDLink> Links;
 
 
+/**
+ * The SWID Tag as a data structure.
+ */
 class SWIDStruct
 {
 public:
 	SWIDStruct();
 
+	/// Set all empty values to their defaults.
 	void applyDefaults();
 
+	/// Name of the product or component as it would normally be referenced. HARD REQUIREMENT.
 	std::string name;
+	/// Globally unique identifier of the tag. HARD REQUIREMENT.
 	std::string tagId;
+	/// Detailed version of the product. SOFT REQUIREMENT, defaults to "0.0"
 	std::string version;
+	/// Encoding of the version, e.g. "semver", "decimal", "unknown". SOFT REQUIREMENT, defaults to "multipartnumeric"
 	std::string versionScheme;
+	/// Language of the tag in form of W3C-langtag. Automatically inherited to sub-elements. SOFT REQUIREMENT without default.
 	std::string xml_lang;
-	/// Default tag type is "primary"
+	/// OPTIONAL, defaults to SWID_TYPE_PRIMARY.
 	type_id type;
 
 	Entities entities;

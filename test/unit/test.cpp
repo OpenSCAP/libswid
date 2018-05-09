@@ -1,3 +1,5 @@
+#include <regex>
+
 #include "catch.hpp"
 
 #include "SWIDStruct.h"
@@ -5,6 +7,8 @@
 #include "Translator.h"
 
 using std::string;
+using std::regex;
+using std::regex_match;
 
 
 TEST_CASE( "Utilities" ) {
@@ -41,12 +45,19 @@ TEST_CASE( "Utilities" ) {
 
 void check(string parser_name) {
 	auto * loader = get_a_swidtagio(parser_name.c_str());
-	CHECK_THROWS( loader->load("") );
+	SECTION(parser_name + ": Sanity") {
+		CHECK_THROWS( loader->load("") );
+		try {
+			loader->load("");
+		} catch (const XMLReadError & toCatch) {
+			regex good_msg_start("Error loading from '':.*");
+			REQUIRE(regex_match(toCatch.what(), good_msg_start));
+		}
+	}
 	SWIDStruct swid;
 
 	swid.name = "ACME RoadRunner Management Suite";
 	swid.tagId = "com.acme.rms-ce-v4-1-5-0";
-	swid.version = "1.2.3";
 	swid.xml_lang = "en-us";
 	string fname = parser_name;
 	fname += ".xml";
@@ -69,9 +80,11 @@ void check(string parser_name) {
 		REQUIRE( loaded_swid.type == swid.type );
 		REQUIRE( loaded_swid.xml_lang == swid.xml_lang );
 		REQUIRE( swid.version == loaded_swid.version );
+		REQUIRE( loaded_swid.version == string("") );
 		REQUIRE( loaded_swid.versionScheme == string("") );
 
 		loaded_swid.applyDefaults();
+		REQUIRE( loaded_swid.version == string("0.0") );
 		REQUIRE( loaded_swid.versionScheme == string("multipartnumeric") );
 
 		REQUIRE( loaded_swid.entities.size() == 1 );
@@ -83,6 +96,7 @@ void check(string parser_name) {
 		entity2.role = Role("distributor").RoleAsId();
 		swid.entities.push_back(entity2);
 
+		swid.version = "1.2.3";
 		swid.versionScheme = "semver";
 		swid.type = SWID_TYPE_PATCH;
 
@@ -100,6 +114,7 @@ void check(string parser_name) {
 		REQUIRE( loaded_swid.entities.size() == 2 );
 		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
 		REQUIRE( loaded_swid.entities[1] == swid.entities[1] );
+		REQUIRE( loaded_swid.version == swid.version);
 		REQUIRE( loaded_swid.versionScheme == swid.versionScheme );
 	}
 

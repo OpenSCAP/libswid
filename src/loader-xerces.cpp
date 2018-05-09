@@ -1,4 +1,5 @@
 #include <sstream>
+#include <map>
 
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/sax/HandlerBase.hpp>
@@ -17,41 +18,18 @@
 #include "loader-xerces.h"
 #include "Translator.h"
 
+#include "loader-generic.cpp"
 
 using namespace xercesc;
 using std::ostringstream;
 using std::string;
+using std::map;
 
 
-// TODO: Xerces leaks memory, because transcoded strings have to be released and aren't.
+// TODO: Xerces is bad with memory, because transcoded strings have to be released and aren't.
 // See also: https://stackoverflow.com/questions/9826518/purpose-of-xmlstringtranscode
 // and https://alfps.wordpress.com/2010/05/27/cppx-xerces-strings-simplified-by-ownership-part-i/#ownership
-
-
-// Taken from: https://stackoverflow.com/a/2897419/592892
-class XStr
-{
-public :
-	XStr(const char * const toTranscode)
-	{
-		// Call the private transcoding method
-		fUnicodeForm = XMLString::transcode(toTranscode);
-	}
-
-	~XStr()
-	{
-		XMLString::release(&fUnicodeForm);
-	}
-
-	const XMLCh * unicodeForm() const
-	{
-		return fUnicodeForm;
-	}
-
-private :
-	XMLCh * fUnicodeForm;
-};
-
+// See https://stackoverflow.com/a/2897419/592892
 
 #define X2(str) XStr(str).unicodeForm()
 
@@ -101,14 +79,15 @@ static void OutputXML(DOMDocument * pmyDOMDocument, string filePath)
 	R(xml_endl);
 	delete formatTarget;
 	output->release();
+	pmyDOMDocument->release();
 }
 
 
-XercesSWIDTagIO::XercesSWIDTagIO():SWIDTagIO() {
+XercesSWIDTagIO::XercesSWIDTagIO() {
 	try {
 		XMLPlatformUtils::Initialize();
 	}
-	catch (const XMLException& toCatch) {
+	catch (const XMLException & toCatch) {
 		ostringstream msg;
 		auto message = XMLString::transcode(toCatch.getMessage());
 		msg << "Error during initialization: ";
@@ -118,9 +97,12 @@ XercesSWIDTagIO::XercesSWIDTagIO():SWIDTagIO() {
 	}
 	parser = NULL;
 
-	swid_ns = X("http://standards.iso.org/iso/19770/-2/2015/schema.xsd");
+	swid_ns = X(SWID_NS);
 	xmlch_entity = X("Entity");
 	xmlch_link = X("Link");
+
+	element_strings[SWID_ELEMENT_ENTITY] = xmlch_entity;
+	element_strings[SWID_ELEMENT_LINK] = xmlch_link;
 }
 
 
@@ -134,57 +116,6 @@ XercesSWIDTagIO::~XercesSWIDTagIO() {
 	R(swid_ns);
 
 	XMLPlatformUtils::Terminate();
-}
-
-
-SWIDStruct XercesSWIDTagIO::load(const string & filename) {
-	if (parser != NULL) {
-		deleteParser();
-	}
-	createParser();
-
-	parser->parse(filename.c_str());
-
-	auto * doc = parser->getDocument();
-	auto * pRoot = doc->getDocumentElement();
-
-	auto ret = SWIDStruct();
-
-	ret.name = extractAttrValue(pRoot, "name");
-	ret.tagId = extractAttrValue(pRoot, "tagId");
-	ret.version = extractAttrValue(pRoot, "version");
-	ret.versionScheme = extractAttrValue(pRoot, "versionScheme");
-	ret.xml_lang = extractAttrValue(pRoot, "xml:lang");
-
-	ret.type = determine_type_id(
-		extractAttrValue(pRoot, "corpus").c_str(),
-		extractAttrValue(pRoot, "patch").c_str(),
-		extractAttrValue(pRoot, "supplemental").c_str());
-
-	auto entity = SWIDEntity();
-	string role;
-	for (auto it = pRoot->getFirstElementChild(); it != NULL; it = it->getNextElementSibling()) {
-		if (XMLString::compareIString(it->getTagName(), xmlch_entity)) {
-			continue;
-		}
-		entity.name = extractAttrValue(it, "name");
-		entity.regid = extractAttrValue(it, "regid");
-		role = extractAttrValue(it, "role");
-		entity.role = Role(role).RoleAsId();
-		ret.entities.push_back(entity);
-	}
-
-	auto link = SWIDLink();
-	for (auto it = pRoot->getFirstElementChild(); it != NULL; it = it->getNextElementSibling()) {
-		if (XMLString::compareIString(it->getTagName(), xmlch_link)) {
-			continue;
-		}
-		link.href = extractAttrValue(it, "href");
-		link.rel = extractAttrValue(it, "rel");
-		ret.links.push_back(link);
-	}
-
-	return ret;
 }
 
 
@@ -207,49 +138,60 @@ void XercesSWIDTagIO::createParser() {
 }
 
 
-void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
+std::map<int, std::vector<DOMElement *> > XercesSWIDTagIO::subElementsOf(DOMElement * el) const {
+	auto result = createEmptyMap();
+	for (auto it = el->getFirstElementChild(); it != NULL; it = it->getNextElementSibling()) {
+		if (XMLString::compareIString(it->getTagName(), xmlch_entity) == 0) {
+			result[SWID_ELEMENT_ENTITY].push_back(it);
+		} else if (XMLString::compareIString(it->getTagName(), xmlch_link) == 0) {
+			result[SWID_ELEMENT_LINK].push_back(it);
+		}
+	}
+	return result;
+}
+
+
+SWIDStruct XercesSWIDTagIO::load(const string & filename) {
+	if (parser != NULL) {
+		deleteParser();
+	}
+	createParser();
+
+	SWIDStruct result;
+	try {
+		result = XMLIO<DOMElement>::load(filename);
+	} catch (const XMLException & toCatch) {
+		deleteParser();
+		auto message = XMLString::transcode(toCatch.getMessage());
+		throw create_read_error(filename, message);
+	} catch (...) {
+		deleteParser();
+		throw create_read_error(filename, "Unknown error.");
+	}
+
+	deleteParser();
+
+	return result;
+}
+
+
+DOMElement * XercesSWIDTagIO::readRoot(const string & filename) {
+	parser->parse(filename.c_str());
+	doc = parser->getDocument();
+
+	return doc->getDocumentElement();
+}
+
+
+DOMElement * XercesSWIDTagIO::createRoot() {
 	auto * xml_core = X("Core");
 	auto * implementation = DOMImplementationRegistry::getDOMImplementation(xml_core);
 
 	auto * xml_swid = X("SoftwareIdentity");
-	auto * doc = implementation->createDocument(swid_ns, xml_swid, 0);
-	auto * pRoot = doc->getDocumentElement();
-
-	setAttrValue(pRoot, "name", what.name);
-	setAttrValue(pRoot, "tagId", what.tagId);
-	setAttrValue(pRoot, "version", what.version);
-	setAttrValue(pRoot, "versionScheme", what.versionScheme);
-	setAttrValue(pRoot, "xml:lang", what.xml_lang);
-
-	string corpus, patch, supplemental;
-	set_strings_to_match_type(what.type, corpus, patch, supplemental);
-	setAttrValue(pRoot, "corpus", corpus);
-	setAttrValue(pRoot, "patch", patch);
-	setAttrValue(pRoot, "supplemental", supplemental);
-
-	for (auto it = what.entities.begin(); it != what.entities.end(); it++) {
-		auto * entity_el = doc->createElementNS(swid_ns, xmlch_entity);
-		setAttrValue(entity_el, "name", it->name);
-		setAttrValue(entity_el, "regid", it->regid);
-		setAttrValue(entity_el, "role", Role(it->role).RoleAsString());
-		pRoot->appendChild(entity_el);
-	}
-
-	for (auto it = what.links.begin(); it != what.links.end(); it++) {
-		auto * el = doc->createElementNS(swid_ns, xmlch_link);
-		setAttrValue(el, "href", it->href);
-		setAttrValue(el, "rel", it->rel);
-		pRoot->appendChild(el);
-	}
-
-	OutputXML(doc, filename);
-	doc->release();
+	doc = implementation->createDocument(swid_ns, xml_swid, 0);
 	R(xml_swid);
 	R(xml_core);
-
-	if (false) {
-		// throw XMLReadError(doc.ErrorDesc());
-	}
+	return doc->getDocumentElement();
 }
 
 
@@ -262,7 +204,7 @@ void XercesSWIDTagIO::setAttrValue(DOMElement * el, const char * name, const str
 }
 
 
-string XercesSWIDTagIO::extractAttrValue(DOMElement * el, const char * name) {
+string XercesSWIDTagIO::extractAttrValue(DOMElement * el, const char * name) const {
 	auto * xml_name = X(name);
 	auto * xml_val = el->getAttribute(xml_name);
 	const char * text_val = Y(xml_val);
@@ -270,4 +212,16 @@ string XercesSWIDTagIO::extractAttrValue(DOMElement * el, const char * name) {
 	delete text_val;
 	R(xml_name);
 	return ret;
+}
+
+
+DOMElement * XercesSWIDTagIO::createSubElement(DOMElement * pRoot, int element_type) {
+	auto * el = doc->createElementNS(swid_ns, element_strings[element_type]);
+	pRoot->appendChild(el);
+	return el;
+}
+
+
+void XercesSWIDTagIO::saveToFile(const std::string & filename) {
+	OutputXML(doc, filename);
 }

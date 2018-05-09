@@ -23,6 +23,9 @@ void SWIDStruct::applyDefaults() {
 	if (versionScheme.size() == 0) {
 		versionScheme = "multipartnumeric";
 	}
+	if (version.size() == 0) {
+		version = "0.0";
+	}
 }
 
 
