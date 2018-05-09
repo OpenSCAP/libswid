@@ -49,8 +49,8 @@ void check(string parser_name) {
 		CHECK_THROWS( loader->load("") );
 		try {
 			loader->load("");
-		} catch (const XMLReadError & toCatch) {
-			regex good_msg_start("Error loading from '':.*");
+		} catch (const XMLIOError & toCatch) {
+			regex good_msg_start("Could not load from '':.*");
 			REQUIRE(regex_match(toCatch.what(), good_msg_start));
 		}
 	}

@@ -3,6 +3,11 @@
 
 
 template<class el_t>
+XMLIO<el_t>::~XMLIO() {
+}
+
+
+template<class el_t>
 SWIDStruct XMLIO<el_t>::load(const std::string & filename) {
 	el_t * pRoot = readRoot(filename);
 
