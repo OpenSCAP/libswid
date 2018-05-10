@@ -1,11 +1,9 @@
-#include "SWIDStruct.h"
-#include "lib.h"
+#include <libswid>
 
 
-
-void shuffle_stuff(SWIDTagIO * io, const char * src, const char * dest) {
-	auto data = io->load(src);
-	io->save(dest, data);
+void shuffle_stuff(SWIDTagIO * io, const char * source_filename, const char * dest_filename) {
+	auto data = io->load(source_filename);
+	io->save(dest_filename, data);
 }
 
 
@@ -17,5 +15,6 @@ int main(int argc, const char ** argv) {
 	for (int i = 1; i < argc - 1; i++) {
 		shuffle_stuff(io, argv[i], argv[i + 1]);
 	}
+	delete io;
 	return 0;
 }

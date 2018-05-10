@@ -29,14 +29,14 @@ find_package(TinyXML)
 # This allows to include files relative to the root of the src directory with a <> pair
 # target_include_directories(swid-util PUBLIC src)
 
-add_library(libswid SHARED ${sources})
+add_library(swid SHARED ${sources})
 
-# target_link_libraries(swid-util libswid)
+# target_link_libraries(swid-util swid)
 
-target_compile_options(libswid PUBLIC -std=c++11 -Wall)
+target_compile_options(swid PUBLIC -std=c++11 -Wall)
 
-target_include_directories(libswid PUBLIC src ${XercesC_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS})
-target_link_libraries(libswid ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
+target_include_directories(swid PUBLIC src ${XercesC_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS})
+target_link_libraries(swid ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
 
 # This copies all resource files in the build directory.
 # We need this, because we want to work with paths relative to the executable.
@@ -53,7 +53,7 @@ add_executable(unit_tests ${sources_test} ${sources})
 # Not having explicit sources would destroy the coverage analysis.
 #
 # add_executable(unit_tests ${sources_test})
-# target_link_libraries(unit_tests PUBLIC libswid)
+# target_link_libraries(unit_tests PUBLIC swid)
 target_link_libraries(unit_tests ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
 
 # This define is added to prevent collision with the main.
@@ -73,7 +73,7 @@ add_test ("Unit" unit_tests)
 add_test ("Resaving" resaver)
 
 find_package(codecov)
-add_coverage(libswid)
+add_coverage(swid)
 add_coverage(unit_tests)
 list(APPEND LCOV_REMOVE_PATTERNS "'/usr/*'")
 list(APPEND LCOV_REMOVE_PATTERNS "'${PROJECT_SOURCE_DIR}/test/*'")
@@ -86,12 +86,10 @@ coverage_evaluate()
 
 # All install commands get the same destination. this allows us to use paths
 # relative to the executable.
-install(TARGETS DESTINATION example_destination)
-
-# This is basically a repeat of the file copy instruction that copies the
-# resources in the build directory, but here we tell cmake that we want it
-# in the package.
-install(DIRECTORY resources DESTINATION example_destination)
+install(TARGETS swid
+	LIBRARY DESTINATION lib)
+install(FILES src/include/libswid DESTINATION include)
+install(FILES src/lib.h src/SWIDStruct.h DESTINATION include/swid)
 
 # Now comes everything we need, to create a package
 # there are a lot more variables you can set, and some
@@ -102,6 +100,10 @@ set(CPACK_PACKAGE_VERSION "0.0.1")
 
 # We don't want to split our program up into several incomplete pieces.
 set(CPACK_MONOLITHIC_INSTALL 1)
+
+SET(CPACK_PACKAGE_VENDOR "Red Hat, Inc.")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 
 # This must be last
 include(CPack)

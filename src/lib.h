@@ -15,10 +15,6 @@ public:
 };
 
 
-XMLIOError create_read_error(const std::string & filename, const std::string & what_happened);
-XMLIOError create_save_error(const std::string & filename, const std::string & what_happened);
-
-
 class SWIDTagIO
 {
 public:

@@ -33,3 +33,8 @@
 
 # build dir
 build
+
+# doc generated stuff
+docs/doxygen/html
+docs/doxygen/xml
+docs/_build
