@@ -4,8 +4,8 @@
    contain the root `toctree` directive.
 
 
-Welcome to libswid's documentation!
-===================================
+libswid documentation
+=====================
 
 libswid is a library that aims to help developers to deal with `SWID tags <https://tagvault.org/swid-tags/what-are-swid-tags/>`_.
 
