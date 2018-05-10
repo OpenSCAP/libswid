@@ -1,4 +1,8 @@
-/*
+#!/bin/bash
+# Add copyright stuff to those source files.
+# Run without arguments.
+
+COPYRIGHT="/*
  * libswid, The SWID Tag Manipulation Library
  * Copyright (C) 2018, Red Hat Security Compliance Team.
  *
@@ -18,47 +22,20 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- */
+ */"
 
-#pragma once
+SRCDIR=../../src
+FILES="$(find $SRCDIR -name '*.h' -o -name '*.cpp' -o -name libswid)"
 
-#include <stdexcept>
-#include <string>
-
-#include "SWIDStruct.h"
-
-
-
-class XMLIOError : public std::runtime_error
-{
-public:
-	explicit XMLIOError(const std::string & what_arg);
-	explicit XMLIOError(const char * what_arg);
-};
+find_copyright_end() {
+	local fname="$1"
+	grep -n '^ \*/' "$fname" | head -n 1 | cut -f 1 -d :
+}
 
 
-class SWIDTagIO
-{
-public:
-	virtual ~SWIDTagIO();
-
-	/**
-	 * Get a SWIDStruct instance from an XML file.
-	 */
-	virtual SWIDStruct load(const std::string & filename) = 0;
-	/**
-	 * Save a SWIDStruct instance to an XML file.
-	 */
-	virtual void save(const std::string & filename, const SWIDStruct & what) = 0;
-};
-
-
-/**
- * Get pointer to a SWIDTagIO instance.
- *
- * Remember to free it using `delete`!
- *
- * Args:
- *  - type: The type string. May be one of "xerces", "tinyxml"
- */
-SWIDTagIO * get_a_swidtagio(const char * type);
+for file in $FILES; do
+	copyright_ends=$(find_copyright_end "$file")
+	test -n "$copyright_ends" || copyright_ends=0
+	file_past_copyright="$(tail -n +$((copyright_ends + 1)) "$file")"
+	printf "%s\n" "$COPYRIGHT" "$file_past_copyright" > "$file"
+done
