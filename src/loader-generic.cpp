@@ -1,7 +1,6 @@
 #include "loader-generic.h"
 #include "Translator.h"
 
-
 template<class el_t>
 XMLIO<el_t>::~XMLIO() {
 }

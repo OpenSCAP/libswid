@@ -9,6 +9,10 @@
 enum {SWID_ELEMENT_ENTITY = 0, SWID_ELEMENT_LINK, TOTAL_SWID_ELEMENT_COUNT};
 
 
+XMLIOError create_read_error(const std::string & filename, const std::string & what_happened);
+XMLIOError create_save_error(const std::string & filename, const std::string & what_happened);
+
+
 template<class el_t>
 class XMLIO : public SWIDTagIO
 {

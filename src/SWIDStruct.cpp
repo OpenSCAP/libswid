@@ -12,20 +12,26 @@ role_id operator & (role_id a, role_id b) {
 }
 
 
-SWIDStruct::SWIDStruct():
-	name(), tagId(), version(), versionScheme(), xml_lang(), type(SWID_TYPE_PRIMARY),
-	entities()
+SWIDBase::SWIDBase():
+	name(), tagId(), version(), versionScheme(), xml_lang(), type(SWID_TYPE_PRIMARY)
 {
 }
 
 
-void SWIDStruct::applyDefaults() {
+void SWIDBase::applyDefaults() {
 	if (versionScheme.size() == 0) {
 		versionScheme = "multipartnumeric";
 	}
 	if (version.size() == 0) {
 		version = "0.0";
 	}
+}
+
+
+SWIDStruct::SWIDStruct():
+	SWIDBase(),
+	entities(), links()
+{
 }
 
 
