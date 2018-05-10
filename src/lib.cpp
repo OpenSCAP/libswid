@@ -40,7 +40,7 @@ SWIDTagIO::~SWIDTagIO() {
 }
 
 
-SWIDTagIO * get_a_swidtagio(const char * type) {
+SWIDTagIO * get_swidtagio(const char * type) {
 	if (strcmp(type, "tinyxml") == 0) {
 		return new TiXMLSWIDTagIO();
 	} else if (strcmp(type, "xerces") == 0) {

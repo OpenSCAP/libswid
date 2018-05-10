@@ -14,7 +14,7 @@ int main(int argc, const char ** argv) {
 	SWIDStruct tag_data;
 
 	const char * xml_backend = "xerces";
-	auto * io = get_a_swidtagio(xml_backend);
+	auto * io = get_swidtagio(xml_backend);
 	if (io == nullptr) {
 		cout << "Error getting XML backend '";
 	        cout << xml_backend << "', try another one.\n";
