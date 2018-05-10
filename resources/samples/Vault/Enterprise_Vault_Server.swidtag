@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SoftwareIdentity
+    name="Veritas Enterprise Vault Server"
+    tagId="iso-sid-cmp-vtas-enterprise-vault-server-v12-2-0"
+    version="12.2.0.0"
+    versionScheme="multipartnumeric"
+    tagVersion="1"
+	
+    xml:lang="en"
+    xmlns:vTag="http://tagvault.org/xsd/swid-extensions-2015.xsd"
+    xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" 
+    xmlns:ds="http://www.w3.org/2000/09/xmldsig11#" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 	
+    xsi:schemaLocation="http://standards.iso.org/iso/19770/-2/2015/schema.xsd http://standards.iso.org/iso/19770/-2/2015-current/schema.xsd">
+
+  <!-- Typical cosmetic details about the product -->
+  <Meta
+    entitlementDataRequired="true"
+    summary="This tag indicates the presence of Veritas Enterprise Vault Server on this system."
+    productFamily="Enterprise Vault"
+    persistentId="iso-pid-cmp-vtas-enterprise-vault-server"
+    unspscVersion="ver.19.0501"
+    unspscCode="43232203"
+    vTag:copyright="Copyright (c) 2017 Veritas Technologies LLC. All rights reserved. Redistribution and use, with or without modification is permitted. THIS SOFTWARE ID TAG IS PROVIDED - AS IS -, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+  />
+    
+  <!-- this software is created, licensed and tagged by the same org -->
+  <Entity
+    name="Veritas Technologies LLC"
+    regid="veritas.com"
+    role="softwareCreator licensor tagCreator" />
+
+</SoftwareIdentity>
+
+
