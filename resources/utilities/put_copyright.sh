@@ -6,8 +6,8 @@ COPYRIGHT="/*
  * libswid, The SWID Tag Manipulation Library
  * Copyright (C) 2018, Red Hat Security Compliance Team.
  *
- * Red Hat, Inc., hereby disclaims all copyright interes
- * in the library 'libswid'.
+ * Red Hat, Inc., Durham, North Carolina hereby disclaims
+ * all copyright interest in the library 'libswid'.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
