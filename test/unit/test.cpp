@@ -44,7 +44,7 @@ TEST_CASE( "Utilities" ) {
 
 
 void check(string parser_name) {
-	auto * loader = get_a_swidtagio(parser_name.c_str());
+	auto * loader = get_swidtagio(parser_name.c_str());
 	SECTION(parser_name + ": Sanity") {
 		CHECK_THROWS( loader->load("") );
 		try {

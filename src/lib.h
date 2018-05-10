@@ -61,4 +61,4 @@ public:
  * Args:
  *  - type: The type string. May be one of "xerces", "tinyxml"
  */
-SWIDTagIO * get_a_swidtagio(const char * type);
+SWIDTagIO * get_swidtagio(const char * type);
