@@ -36,7 +36,7 @@ public:
 	virtual ~XercesSWIDTagIO() override;
 
 	virtual SWIDStruct load(const std::string & filename) override;
-	// virtual void save(const std::string & filename, const SWIDStruct & what) override;
+	virtual void save(const std::string & filename, const SWIDStruct & what) override;
 
 private:
 	void deleteParser();

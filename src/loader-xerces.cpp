@@ -196,6 +196,18 @@ SWIDStruct XercesSWIDTagIO::load(const string & filename) {
 }
 
 
+void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
+	try {
+		XMLIO::save(filename, what);
+	} catch (const XMLException & toCatch) {
+		auto message = XMLString::transcode(toCatch.getMessage());
+		throw create_save_error(filename, message);
+	} catch (...) {
+		throw create_save_error(filename, "Unknown error.");
+	}
+}
+
+
 DOMElement * XercesSWIDTagIO::readRoot(const string & filename) {
 	parser->parse(filename.c_str());
 	doc = parser->getDocument();
