@@ -45,6 +45,7 @@ TEST_CASE( "Utilities" ) {
 
 void check(string parser_name) {
 	auto * loader = get_swidtagio(parser_name.c_str());
+	SWIDStruct swid;
 	SECTION(parser_name + ": Sanity") {
 		CHECK_THROWS( loader->load("") );
 		try {
@@ -53,8 +54,14 @@ void check(string parser_name) {
 			regex good_msg_start("Could not load from '':.*");
 			REQUIRE(regex_match(toCatch.what(), good_msg_start));
 		}
+		CHECK_THROWS( loader->save("/", swid) );
+		try {
+			loader->save("/", swid);
+		} catch (const XMLIOError & toCatch) {
+			regex good_msg_start("Could not save to '/':.*");
+			REQUIRE(regex_match(toCatch.what(), good_msg_start));
+		}
 	}
-	SWIDStruct swid;
 
 	swid.name = "ACME RoadRunner Management Suite";
 	swid.tagId = "com.acme.rms-ce-v4-1-5-0";
@@ -110,6 +117,7 @@ void check(string parser_name) {
 		loaded_swid = loader->load(fname);
 
 		REQUIRE( loaded_swid.links.size() == 1 );
+		REQUIRE( loaded_swid.links[0] == swid.links[0] );
 
 		REQUIRE( loaded_swid.entities.size() == 2 );
 		REQUIRE( loaded_swid.entities[0] == swid.entities[0] );
