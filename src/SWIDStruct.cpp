@@ -33,13 +33,7 @@ role_id operator & (role_id a, role_id b) {
 }
 
 
-SWIDBase::SWIDBase():
-	name(), tagId(), version(), versionScheme(), xml_lang(), type(SWID_TYPE_PRIMARY)
-{
-}
-
-
-void SWIDBase::applyDefaults() {
+void SWIDStruct::applyDefaults() {
 	if (versionScheme.size() == 0) {
 		versionScheme = "multipartnumeric";
 	}
@@ -50,7 +44,7 @@ void SWIDBase::applyDefaults() {
 
 
 SWIDStruct::SWIDStruct():
-	SWIDBase(),
+	name(), tagId(), version(), versionScheme(), xml_lang(), type(SWID_TYPE_PRIMARY),
 	entities(), links()
 {
 }

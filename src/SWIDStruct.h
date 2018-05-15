@@ -25,33 +25,7 @@
 #include <string>
 #include <vector>
 
-
-/**
- * SWID Tag Types
- *
- * A tag may have exactly one type.
- */
-enum type_id {SWID_TYPE_PRIMARY, SWID_TYPE_CORPUS, SWID_TYPE_PATCH, SWID_TYPE_SUPPLEMENTAL};
-
-
-/**
- * SWID Entity Roles
- *
- * An entity has at least one role. More than one role at the same time are allowed.
- */
-enum role_id {
-	SWID_ROLE_NONE = 0,
-	SWID_ROLE_AGGREGATOR
-		= 1 << 0,
-	SWID_ROLE_DISTRIBUTOR
-		= 1 << 1,
-	SWID_ROLE_LICENSOR
-		= 1 << 2,
-	SWID_ROLE_SOFTWARE_CREATOR
-		= 1 << 3,
-	SWID_ROLE_TAG_CREATOR
-		= 1 << 4
-};
+#include "swid-common.h"
 
 
 role_id operator | (role_id a, role_id b);
@@ -75,15 +49,19 @@ class SWIDLink
 public:
 	std::string href;
 	std::string rel;
+
 	bool operator == (const SWIDLink & rhs) const;
 };
 typedef std::vector<SWIDLink> Links;
 
 
-class SWIDBase
+/**
+ * The SWID Tag as a data structure.
+ */
+class SWIDStruct
 {
 public:
-	SWIDBase();
+	SWIDStruct();
 
 	/// Set all empty values to their defaults.
 	void applyDefaults();
@@ -100,16 +78,6 @@ public:
 	std::string xml_lang;
 	/// OPTIONAL, defaults to SWID_TYPE_PRIMARY.
 	type_id type;
-};
-
-
-/**
- * The SWID Tag as a data structure.
- */
-class SWIDStruct : public SWIDBase
-{
-public:
-	SWIDStruct();
 
 	/// Ordered list of entities
 	Entities entities;
