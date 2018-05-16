@@ -7,7 +7,7 @@ project(libswid)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-file(GLOB_RECURSE sources      src/*.cpp src/*.h)
+file(GLOB_RECURSE sources      src/*.c src/*.cpp src/*.h)
 file(GLOB_RECURSE sources_test_cxx test/unit/*.cpp)
 file(GLOB_RECURSE sources_test_c test/unit/*.c)
 # You can use set(sources src/main.cpp) etc if you don't want to
