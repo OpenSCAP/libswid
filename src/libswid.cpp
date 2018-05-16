@@ -27,11 +27,9 @@ static SWIDStruct C2CXX(const CSWIDStruct & src) {
 }
 
 
-static char * copy_string(const std::string & src) {
+static char * copy_std_string(const std::string & src) {
 	const size_t str_len = src.size() + 1;
-	char * dest = (char *)malloc(str_len * sizeof(char));
-	memcpy(dest, src.c_str(), str_len);
-	return dest;
+	return copy_string(src.c_str(), str_len + 1);
 }
 
 
@@ -49,13 +47,18 @@ int swid_destroy_io(SWIDIOHandle io_handle) {
 
 
 int swid_load_data(SWIDIOHandle io_handle, const char * fname, CSWIDStruct * swid_structure) {
-	auto data = ((SWIDTagIO *)io_handle)->load(fname);
+	SWIDStruct data;
+	try {
+		data = ((SWIDTagIO *)io_handle)->load(fname);
+	} catch (const XMLIOError & err) {
+		return 1;
+	}
 	* swid_structure = swid_get_empty_data();
-	swid_structure->name = copy_string(data.name);
-	swid_structure->tagId = copy_string(data.tagId);
-	swid_structure->version = copy_string(data.version);
-	swid_structure->versionScheme = copy_string(data.versionScheme);
-	swid_structure->xml_lang = copy_string(data.xml_lang);
+	swid_structure->name = copy_std_string(data.name);
+	swid_structure->tagId = copy_std_string(data.tagId);
+	swid_structure->version = copy_std_string(data.version);
+	swid_structure->versionScheme = copy_std_string(data.versionScheme);
+	swid_structure->xml_lang = copy_std_string(data.xml_lang);
 	swid_structure->type = data.type;
 	return 0;
 }
@@ -64,7 +67,11 @@ int swid_load_data(SWIDIOHandle io_handle, const char * fname, CSWIDStruct * swi
 int swid_save_data(SWIDIOHandle io_handle, const char * fname, CSWIDStruct * const swid_structure) {
 	auto data = C2CXX(* swid_structure);
 	auto * io = (SWIDTagIO *)io_handle;
-	io->save(fname, data);
+	try {
+		io->save(fname, data);
+	} catch (const XMLIOError & err) {
+		return 1;
+	}
 	return 0;
 }
 
@@ -85,30 +92,5 @@ CSWIDStruct swid_get_empty_data() {
 	ret.links_count = 0;
 
 	return ret;
-}
-
-
-int swid_destroy_data(CSWIDStruct * data) {
-	if (data->name) {
-		free(data->name);
-		data->name = 0;
-	}
-	if (data->tagId) {
-		free(data->tagId);
-		data->tagId = 0;
-	}
-	if (data->version) {
-		free(data->version);
-		data->version = 0;
-	}
-	if (data->versionScheme) {
-		free(data->versionScheme);
-		data->versionScheme = 0;
-	}
-	if (data->xml_lang) {
-		free(data->xml_lang);
-		data->xml_lang = 0;
-	}
-	return 0;
 }
 }

@@ -9,8 +9,22 @@
 struct CSWIDTagIO;
 typedef struct CSWIDTagIO * SWIDIOHandle;
 
-typedef struct CSWIDLink CSWIDLink;
+
+struct CSWIDEntity
+{
+	char * name;
+	char * regid;
+	int role;
+};
 typedef struct CSWIDEntity CSWIDEntity;
+
+
+struct CSWIDLink
+{
+	char * href;
+	char * rel;
+};
+typedef struct CSWIDLink CSWIDLink;
 
 
 struct CSWIDStruct
@@ -51,6 +65,13 @@ int swid_save_data(SWIDIOHandle io_handle, const char * fname, CSWIDStruct * swi
 
 CSWIDStruct swid_get_empty_data();
 int swid_destroy_data(CSWIDStruct * data);
+
+CSWIDEntity swid_get_empty_entity();
+int swid_destroy_entity(CSWIDEntity * entity);
+
+int swid_push_back_entity(CSWIDStruct * data, CSWIDEntity * entity);
+
+char * copy_string(const char * src, size_t full_str_len);
 
 #ifdef __cplusplus
 }
