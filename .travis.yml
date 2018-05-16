@@ -1,5 +1,15 @@
 language: cpp
 
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "JE2iPC04a4MpRCYpe0WzHuypSZXndS21lAHCxauoEea5GcT03lFDoxYG7S8e1awjePr1M2aI4mVXK4UfCUGQGoLJhGGmq4Ui5NLImMylfF294WvLKXHrjPWrdznYFtstgJJroTzNFUpyviiW9a0sS/dafH9ID7SwtoQQPiJbsUORzHpdfQ3qDtIXPeoy5MWLtBSdEK7BCHKDSyEnJRx4Hr1f6awPZpyj6ZHP1lPFXHF9EHi1ZRNuCIlJUKKxzg4VSPO2MZ1qwkmeCJgHkSBHIOPNSQ+NsOPUCro04hNfeYwcycoRm4TM28UQd0dTzVHuwv2BvPkrOg3F896EQGH9a/+HBTObp5CPshIikPfC/M8O0GAuafWO/DYRp/hDDWTRoWOKdHyQtO31va3Zc7ZOap4zEF21ErCitGCk6bUwR5E19vuPPhOl1n8K9q33WmYSp5Jv8G4SeeHVorSlsX0j+mFoPOtuf34wN0BmghWXUbNhe+NGZ881SvAWARvu6lE/KPyDNqIiK8wVqn+Sr5MMqy79sMp9BcshJtb9lFLFKBHgRVSg0eAQ03hJawac+6zjZbeT62v2G/FuIWZvEpzdJZfCn7fAXyizWPyXMl2XXq/zuvkvAmy5C97W5vWtA8bHdbBU8mrjdVpNiZ/v+FWwYTh1ushpYpBItvxfYr+8YQc="
+
+before_install:
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq libxerces-c-dev libtinyxml-dev
@@ -26,6 +36,15 @@ addons:
 
   sonarcloud:
     organization: "openscap"
+
+  coverity_scan:
+    project:
+      name: "OpenSCAP/libswid"
+      description: "SWID tags library"
+    notification_email: matyc@redhat.com
+    build_command_prepend: cmake
+    build_command: make
+    branch_pattern: master
 
 cache:
   directories:
