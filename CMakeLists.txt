@@ -14,6 +14,8 @@ file(GLOB_RECURSE sources_test test/unit/*.cpp)
 
 find_package(XercesC)
 find_package(TinyXML)
+find_package(SWIG)
+find_package(PythonLibs)
 
 ###############################################################################
 ## target definitions #########################################################
@@ -41,6 +43,18 @@ target_link_libraries(swid ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
 # This copies all resource files in the build directory.
 # We need this, because we want to work with paths relative to the executable.
 file(COPY ${data} DESTINATION resources)
+
+
+include(${SWIG_USE_FILE})
+
+set_property(SOURCE src/swig/swid.i PROPERTY CPLUSPLUS ON)
+set_property(SOURCE src/swig/swid.i PROPERTY SWIG_FLAGS -py3 -modern -safecstrings -I${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+swig_add_library(swid MODULE LANGUAGE python SOURCES src/swig/swid.i)
+swig_link_libraries(swid ${PYTHON_LIBRARY} swid)
+
+target_include_directories(${SWIG_MODULE_swid_REAL_NAME} PUBLIC src ${PYTHON_INCLUDE_PATH} )
+
 
 
 ###############################################################################
