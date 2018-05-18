@@ -6,6 +6,7 @@ libswid is able to transfer SWID tag files to memory structures, and vice versa.
 It supports a subset of the SWID standard:
 
 - SoftwareIdentity
+
   - Entity
   - Link
 
@@ -25,3 +26,19 @@ Example
 
 .. literalinclude:: examples/report_creator_entity.cpp
    :language: c++
+
+
+Bindings
+--------
+
+You can use ``libswid`` from other languages besides ``C++``.
+
+
+Python
+++++++
+
+You need SWIG to build the Python bindings.
+Then, you just import the ``swid`` module, that mimicks the ``C++`` interface:
+
+.. literalinclude:: examples/report_creator_entity.py
+   :language: Python
