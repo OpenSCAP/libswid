@@ -83,8 +83,13 @@ target_link_libraries(resaver PUBLIC ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
 
 include (CTest)
 
+set(CTEST_ENVIRONMENT "PYTHONPATH=.")
+
 add_test ("Unit" unit_tests)
 add_test ("Resaving" resaver)
+add_test (NAME "Python-bindings" COMMAND py.test-3 ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/test.py)
+
+set_tests_properties("Python-bindings" PROPERTIES ENVIRONMENT PYTHONPATH=.)
 
 find_package(codecov)
 add_coverage(swid)
