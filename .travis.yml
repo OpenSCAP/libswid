@@ -5,7 +5,7 @@ before_install:
 
 before_install:
  - sudo apt-get update -qq
- - sudo apt-get install -qq libxerces-c-dev libtinyxml-dev
+ - sudo apt-get install -qq libxerces-c-dev libtinyxml-dev swig python3-dev
 
 script:
  - export CC=gcc-6
