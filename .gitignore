@@ -38,3 +38,7 @@ build
 docs/doxygen/html
 docs/doxygen/xml
 docs/_build
+
+# Python compiled files
+*.pyc
+__pycache__
