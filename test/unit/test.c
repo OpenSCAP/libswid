@@ -14,6 +14,9 @@ const char * str_version = "1.2.3";
 const char * str_versionScheme = "semver";
 const char * str_xml_lang = "en";
 
+const char * entity_name = "The ACME corporation";
+const char * entity_regid = "acme.com";
+unsigned int entity_role = SWID_ROLE_SOFTWARE_CREATOR | SWID_ROLE_TAG_CREATOR;
 
 void create_io(void)
 {
@@ -29,6 +32,15 @@ void create_xml(const char * backend)
 
 	SWIDHandle swid = swid_get_empty_data();
 	SWIDHandle swid_loaded = swid_get_empty_data();
+
+	SWIDEntityHandle entity = swid_get_empty_entity();
+
+        swid_entity_set_name(entity, entity_name);
+        swid_entity_set_regid(entity, entity_regid);
+	swid_entity_set_role(entity, entity_role);
+
+        swid_append_entity_data(swid, entity);
+	swid_destroy_entity(entity);
 
 	swid_set_name(swid, str_name);
 	swid_set_tagId(swid, str_tagId);
@@ -49,6 +61,15 @@ void create_xml(const char * backend)
 	TEST_CHECK(strcmp(str_versionScheme, swid_get_versionScheme(swid_loaded)) == 0);
 	TEST_CHECK(strcmp(str_xml_lang, swid_get_xml_lang(swid_loaded)) == 0);
 	TEST_CHECK(SWID_TYPE_CORPUS == swid_get_type(swid_loaded));
+
+        /* There is exactly one entity. */
+        entity = swid_get_entity(swid, 0);
+	TEST_CHECK(entity != NULL);
+	TEST_CHECK(swid_get_entity(swid, 1) == NULL);
+
+	TEST_CHECK(strcmp(swid_entity_get_name(entity), entity_name) == 0);
+	TEST_CHECK(strcmp(swid_entity_get_regid(entity), entity_regid) == 0);
+	TEST_CHECK(swid_entity_get_role(entity) == entity_role);
 
 	swid_destroy_data(swid_loaded);
 	swid_destroy_data(swid);
