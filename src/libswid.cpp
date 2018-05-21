@@ -124,6 +124,18 @@ int swid_destroy_data(SWIDHandle data) {
  * Entity stuff
  */
 
+
+SWIDEntityHandle swid_get_empty_entity() {
+	return new SWIDEntity();
+}
+
+
+int swid_destroy_entity(SWIDEntityHandle entity) {
+	delete entity;
+	return 0;
+}
+
+
 SWIDEntityHandle swid_get_entity(SWIDHandle swid, size_t index) {
 	if (index >= swid->entities.size()) {
 		return nullptr;
@@ -137,11 +149,34 @@ unsigned int swid_entity_get_role(SWIDEntityHandle entity) {
 }
 
 
+int swid_entity_set_name(SWIDEntityHandle entity, const char * name) {
+	entity->name = name;
+	return 0;
+}
+
+
+int swid_entity_set_role(SWIDEntityHandle entity, unsigned int role) {
+	return entity->role = (role_id)role;
+}
+
+
 const char * swid_entity_get_name(SWIDEntityHandle entity) {
 	return entity->name.c_str();
 }
 
 
+int swid_entity_set_regid(SWIDEntityHandle entity, const char * regid) {
+	entity->regid = regid;
+	return 0;
+}
+
+
 const char * swid_entity_get_regid(SWIDEntityHandle entity) {
 	return entity->regid.c_str();
+}
+
+
+int swid_append_entity_data(SWIDHandle swid, SWIDEntityHandle entity) {
+	swid->entities.push_back(* entity);
+	return 0;
 }

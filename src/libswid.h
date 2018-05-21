@@ -58,11 +58,18 @@ int swid_destroy_data(SWIDHandle data);
 SWIDEntityHandle swid_get_empty_entity();
 int swid_destroy_entity(SWIDEntityHandle entity);
 
-SWIDEntityHandle swid_get_entity(SWIDHandle swid, size_t index);
 
-unsigned int swid_entity_get_role(SWIDEntityHandle entity);
+SWIDEntityHandle swid_get_entity(SWIDHandle swid, size_t index);
+int swid_append_entity_data(SWIDHandle swid, SWIDEntityHandle entity);
+
+int swid_entity_set_name(SWIDEntityHandle entity, const char * name);
 const char * swid_entity_get_name(SWIDEntityHandle entity);
+
+int swid_entity_set_regid(SWIDEntityHandle entity, const char * regid);
 const char * swid_entity_get_regid(SWIDEntityHandle entity);
+
+int swid_entity_set_role(SWIDEntityHandle entity, unsigned int role);
+unsigned int swid_entity_get_role(SWIDEntityHandle entity);
 
 int swid_push_back_entity(SWIDHandle data, SWIDEntityHandle entity);
 
