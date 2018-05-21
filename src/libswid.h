@@ -1,25 +1,16 @@
-#ifndef LIBSWID_H
-#define LIBSWID_H
+#ifndef INCLUDED_LIBSWID_H
+#define INCLUDED_LIBSWID_H
 
 #include <stddef.h>
 
 #include "swid-common.h"
 
-
-struct SWIDTagIO;
 typedef struct SWIDTagIO * SWIDIOHandle;
 
-
-struct SWIDEntity;
-typedef struct SWIDEntity * SWIDEntityHandle;
-
-
-struct SWIDLink;
-typedef struct SWIDLink SWIDLinkHandle;
-
-
-struct SWIDStruct;
 typedef struct SWIDStruct * SWIDHandle;
+
+typedef struct SWIDEntity * SWIDEntityHandle;
+typedef struct SWIDLink SWIDLinkHandle;
 
 
 #ifdef __cplusplus
@@ -77,4 +68,4 @@ int swid_push_back_entity(SWIDHandle data, SWIDEntityHandle entity);
 }
 #endif
 
-#endif /* LIBSWID_H */
+#endif /* INCLUDED_LIBSWID_H */
