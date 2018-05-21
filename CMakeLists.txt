@@ -86,8 +86,13 @@ target_include_directories(resaver PUBLIC src)
 
 target_link_libraries(resaver PUBLIC ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
 
+
 add_executable(example-c++ docs/examples/report_creator_entity.cpp)
 target_link_libraries(example-c++ PUBLIC swid)
+
+add_executable(example-c docs/examples/report_creator_entity.c)
+target_link_libraries(example-c PUBLIC swid)
+
 
 include (CTest)
 
@@ -97,7 +102,10 @@ add_test (NAME "Unit-C++" COMMAND unit_tests++)
 add_test (NAME "Unit-C" COMMAND unit_tests)
 add_test (NAME "resaving" COMMAND resaver)
 add_test (NAME "python-bindings" COMMAND py.test-3 ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/test.py)
-add_test (NAME "doc-examples" COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/test-examples.sh "tinyxml.xml" "./example-c++" "${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/report_creator_entity.py")
+add_test (NAME "doc-examples" COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/test-examples.sh "tinyxml.xml"
+	"./example-c++"
+	"./example-c"
+	"${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/report_creator_entity.py")
 
 
 set_tests_properties("python-bindings" PROPERTIES ENVIRONMENT PYTHONPATH=.)

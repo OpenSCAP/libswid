@@ -6,51 +6,19 @@
 #include "swid-common.h"
 
 
-struct CSWIDTagIO;
-typedef struct CSWIDTagIO * SWIDIOHandle;
+struct SWIDTagIO;
+typedef struct SWIDTagIO * SWIDIOHandle;
 
 
-struct CSWIDEntity
-{
-	char * name;
-	char * regid;
-	int role;
-};
-typedef struct CSWIDEntity CSWIDEntity;
+struct SWIDEntity;
+typedef struct SWIDEntity * SWIDEntityHandle;
 
 
-struct CSWIDLink
-{
-	char * href;
-	char * rel;
-};
-typedef struct CSWIDLink CSWIDLink;
+struct SWIDLink;
+typedef struct SWIDLink SWIDLinkHandle;
 
 
-struct CSWIDStruct
-{
-	/// Name of the product or component as it would normally be referenced. HARD REQUIREMENT.
-	char * name;
-	/// Globally unique identifier of the tag. HARD REQUIREMENT.
-	char * tagId;
-	/// Detailed version of the product. SOFT REQUIREMENT, defaults to "0.0"
-	char * version;
-	/// Encoding of the version, e.g. "semver", "decimal", "unknown". SOFT REQUIREMENT, defaults to "multipartnumeric"
-	char * versionScheme;
-	/// Language of the tag in form of W3C-langtag. Automatically inherited to sub-elements. SOFT REQUIREMENT without default.
-	char * xml_lang;
-	/// OPTIONAL, defaults to SWID_TYPE_PRIMARY.
-	int type;
-
-	/// Ordered list of entities
-	CSWIDEntity * entities;
-	size_t entities_count;
-
-	/// Ordered list of links
-	CSWIDLink * links;
-	size_t links_count;
-};
-typedef struct CSWIDStruct CSWIDStruct;
+struct SWIDStruct;
 typedef struct SWIDStruct * SWIDHandle;
 
 
@@ -87,10 +55,16 @@ unsigned int swid_get_type(SWIDHandle data);
 SWIDHandle swid_get_empty_data();
 int swid_destroy_data(SWIDHandle data);
 
-CSWIDEntity swid_get_empty_entity();
-int swid_destroy_entity(CSWIDEntity * entity);
+SWIDEntityHandle swid_get_empty_entity();
+int swid_destroy_entity(SWIDEntityHandle entity);
 
-int swid_push_back_entity(CSWIDStruct * data, CSWIDEntity * entity);
+SWIDEntityHandle swid_get_entity(SWIDHandle swid, size_t index);
+
+unsigned int swid_entity_get_role(SWIDEntityHandle entity);
+const char * swid_entity_get_name(SWIDEntityHandle entity);
+const char * swid_entity_get_regid(SWIDEntityHandle entity);
+
+int swid_push_back_entity(SWIDHandle data, SWIDEntityHandle entity);
 
 #ifdef __cplusplus
 }

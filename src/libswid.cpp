@@ -119,3 +119,29 @@ int swid_destroy_data(SWIDHandle data) {
 	delete ((SWIDStruct *)data);
 	return 0;
 }
+
+/*
+ * Entity stuff
+ */
+
+SWIDEntityHandle swid_get_entity(SWIDHandle swid, size_t index) {
+	if (index >= swid->entities.size()) {
+		return nullptr;
+	}
+	return & swid->entities[index];
+}
+
+
+unsigned int swid_entity_get_role(SWIDEntityHandle entity) {
+	return entity->role;
+}
+
+
+const char * swid_entity_get_name(SWIDEntityHandle entity) {
+	return entity->name.c_str();
+}
+
+
+const char * swid_entity_get_regid(SWIDEntityHandle entity) {
+	return entity->regid.c_str();
+}
