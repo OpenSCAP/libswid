@@ -42,3 +42,13 @@ Then, you just import the ``swid`` module, that mimicks the ``C++`` interface:
 
 .. literalinclude:: examples/report_creator_entity.py
    :language: Python
+
+
+C
++
+
+Just include ``<libswid.h>``.
+The ``C`` interface also mimicks the ``C++`` interface:
+
+.. literalinclude:: examples/report_creator_entity.c
+   :language: C
