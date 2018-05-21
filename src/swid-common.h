@@ -1,5 +1,5 @@
-#ifndef INCLUDED_SWID_COMMON
-#define INCLUDED_SWID_COMMON
+#ifndef INCLUDED_SWID_COMMON_H
+#define INCLUDED_SWID_COMMON_H
 
 /**
  * SWID Tag Types
@@ -29,4 +29,4 @@ enum role_id {
 };
 
 
-#endif /* INCLUDED_SWID_COMMON */
+#endif /* INCLUDED_SWID_COMMON_H */

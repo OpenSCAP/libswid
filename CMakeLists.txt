@@ -57,7 +57,6 @@ swig_link_libraries(swid ${PYTHON_LIBRARY} swid)
 target_include_directories(${SWIG_MODULE_swid_REAL_NAME} PUBLIC src ${PYTHON_INCLUDE_PATH} )
 
 
-
 ###############################################################################
 ## testing ####################################################################
 ###############################################################################
