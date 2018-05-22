@@ -7,7 +7,7 @@ project(libswid)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-file(GLOB_RECURSE sources      src/*.c src/*.cpp src/*.h)
+file(GLOB_RECURSE sources      src/*.cpp src/*.h)
 file(GLOB_RECURSE sources_test_cxx test/unit/*.cpp)
 file(GLOB_RECURSE sources_test_c test/unit/*.c)
 # You can use set(sources src/main.cpp) etc if you don't want to
@@ -63,8 +63,8 @@ target_include_directories(${SWIG_MODULE_swid_REAL_NAME} PUBLIC src ${PYTHON_INC
 ## testing ####################################################################
 ###############################################################################
 
-add_executable(unit_tests++ ${sources_test_cxx} ${sources})
-add_executable(unit_tests ${sources_test_c} ${sources})
+add_executable(unit_tests++ ${sources_test_cxx})
+add_executable(unit_tests ${sources_test_c})
 add_executable(resaver ${sources} test/integration/resaver.cpp)
 
 # Don't include libswid as a library, use sources.
@@ -72,8 +72,8 @@ add_executable(resaver ${sources} test/integration/resaver.cpp)
 #
 # add_executable(unit_tests ${sources_test})
 # target_link_libraries(unit_tests PUBLIC swid)
-target_link_libraries(unit_tests++ ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
-target_link_libraries(unit_tests ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
+target_link_libraries(unit_tests++ PRIVATE swid)
+target_link_libraries(unit_tests PRIVATE swid)
 
 # This define is added to prevent collision with the main.
 # It might be better solved by not adding the source with the main to the
