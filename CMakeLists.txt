@@ -15,6 +15,8 @@ file(GLOB_RECURSE sources_test test/unit/*.cpp)
 find_package(XercesC)
 find_package(TinyXML)
 find_package(SWIG)
+
+set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4)
 find_package(PythonLibs)
 
 ###############################################################################
