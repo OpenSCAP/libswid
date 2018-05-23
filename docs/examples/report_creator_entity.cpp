@@ -14,20 +14,21 @@ int main(int argc, const char ** argv) {
 	SWIDStruct tag_data;
 
 	const char * xml_backend = "xerces";
-	auto * io = get_swidtagio(xml_backend);
-	if (io == nullptr) {
-		cout << "Error getting XML backend '";
-	        cout << xml_backend << "', try another one.\n";
+	auto io = SWIDTagIO();
+	try {
+		io.setBackend(xml_backend);
+	} catch (const std::runtime_error & e) {
+		cout << "Error getting XML backend '" << xml_backend
+			<< "': '" << e.what()
+			<< "', try another one.\n";
 		return 1;
 	}
 	try {
-		tag_data = io->load(argv[1]);
+		tag_data = io.load(argv[1]);
 	} catch (XMLIOError & exc) {
 		cout << exc.what() << "\n";
-		delete io;
 		return 1;
 	}
-	delete io;
 
 	bool creator_not_found = true;
 	for (auto it = tag_data.entities.begin(); it != tag_data.entities.end(); it++) {

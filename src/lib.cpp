@@ -36,15 +36,55 @@ XMLIOError::XMLIOError(const char * what_arg):std::runtime_error(what_arg) {
 }
 
 
-SWIDTagIO::~SWIDTagIO() {
+SWIDTagIOBase::~SWIDTagIOBase() {
 }
 
 
-SWIDTagIO * get_swidtagio(const char * type) {
+static SWIDTagIOBase * get_swidtagio(const char * type) {
 	if (strcmp(type, "tinyxml") == 0) {
 		return new TiXMLSWIDTagIO();
 	} else if (strcmp(type, "xerces") == 0) {
 		return new XercesSWIDTagIO();
+	} else {
+		std::ostringstream msg;
+		msg << "Unable to set backend to '"
+			<< type << "': Backend not known.";
+		throw std::runtime_error(msg.str());
 	}
-	return NULL;
+}
+
+
+SWIDTagIO::SWIDTagIO():SWIDTagIOBase(), current_backend(), backend(nullptr) {
+}
+
+
+SWIDTagIO::~SWIDTagIO() {
+	delete backend;
+	backend = nullptr;
+	current_backend = "";
+}
+
+
+void SWIDTagIO::setBackend(const std::string & backend_name) {
+	if (backend != nullptr) {
+		delete backend;
+	}
+	backend = get_swidtagio(backend_name.c_str());
+	current_backend = backend_name;
+}
+
+
+SWIDStruct SWIDTagIO::load(const std::string & filename) {
+	if (backend == nullptr) {
+		throw std::runtime_error("No backend has been set, call setBackend first.");
+	}
+	return backend->load(filename);
+}
+
+
+void SWIDTagIO::save(const std::string & filename, const SWIDStruct & what) {
+	if (backend == nullptr) {
+		throw std::runtime_error("No backend has been set, call setBackend first.");
+	}
+	return backend->save(filename, what);
 }

@@ -44,19 +44,20 @@ TEST_CASE( "Utilities" ) {
 
 
 void check(string parser_name) {
-	auto * loader = get_swidtagio(parser_name.c_str());
+	auto loader = SWIDTagIO();
+	loader.setBackend(parser_name.c_str());
 	SWIDStruct swid;
 	SECTION(parser_name + ": Sanity") {
-		CHECK_THROWS( loader->load("") );
+		CHECK_THROWS( loader.load("") );
 		try {
-			loader->load("");
+			loader.load("");
 		} catch (const XMLIOError & toCatch) {
 			regex good_msg_start("Could not load from '':.*");
 			REQUIRE(regex_match(toCatch.what(), good_msg_start));
 		}
-		CHECK_THROWS( loader->save("/", swid) );
+		CHECK_THROWS( loader.save("/", swid) );
 		try {
-			loader->save("/", swid);
+			loader.save("/", swid);
 		} catch (const XMLIOError & toCatch) {
 			regex good_msg_start("Could not save to '/':.*");
 			REQUIRE(regex_match(toCatch.what(), good_msg_start));
@@ -79,9 +80,9 @@ void check(string parser_name) {
 	SECTION(parser_name + ": Basic metadata") {
 		swid.type = SWID_TYPE_CORPUS;
 
-		loader->save(fname, swid);
+		loader.save(fname, swid);
 
-		auto loaded_swid = loader->load(fname);
+		auto loaded_swid = loader.load(fname);
 		REQUIRE( loaded_swid.name == swid.name );
 		REQUIRE( loaded_swid.tagId == swid.tagId );
 		REQUIRE( loaded_swid.type == swid.type );
@@ -112,9 +113,9 @@ void check(string parser_name) {
 		link.rel = "patches";
 		swid.links.push_back(link);
 
-		loader->save(fname, swid);
+		loader.save(fname, swid);
 
-		loaded_swid = loader->load(fname);
+		loaded_swid = loader.load(fname);
 
 		REQUIRE( loaded_swid.links.size() == 1 );
 		REQUIRE( loaded_swid.links[0] == swid.links[0] );
@@ -129,24 +130,23 @@ void check(string parser_name) {
 	SECTION(parser_name + ": Tag types") {
 		swid.type = SWID_TYPE_PRIMARY;
 
-		loader->save(fname, swid);
+		loader.save(fname, swid);
 
-		auto loaded_swid = loader->load(fname);
+		auto loaded_swid = loader.load(fname);
 		REQUIRE( loaded_swid.type == swid.type );
 
 		swid.type = SWID_TYPE_SUPPLEMENTAL;
-		loader->save(fname, swid);
+		loader.save(fname, swid);
 
-		loaded_swid = loader->load(fname);
+		loaded_swid = loader.load(fname);
 		REQUIRE( loaded_swid.type == swid.type );
 
 		swid.type = SWID_TYPE_PATCH;
-		loader->save(fname, swid);
+		loader.save(fname, swid);
 
-		loaded_swid = loader->load(fname);
+		loaded_swid = loader.load(fname);
 		REQUIRE( loaded_swid.type == swid.type );
 	}
-	delete loader;
 }
 
 

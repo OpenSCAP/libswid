@@ -35,7 +35,7 @@ XMLIOError create_save_error(const std::string & filename, const std::string & w
 
 
 template<class el_t>
-class XMLIO : public SWIDTagIO
+class XMLIO : public SWIDTagIOBase
 {
 public:
 	virtual ~XMLIO() override;

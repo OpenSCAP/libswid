@@ -116,7 +116,7 @@ XercesSWIDTagIO::XercesSWIDTagIO() {
 		XMLString::release(&message);
 		throw(msg.str());
 	}
-	parser = NULL;
+	parser = nullptr;
 
 	swid_ns = X(SWID_NS);
 	xmlch_entity = X("Entity");
@@ -128,7 +128,7 @@ XercesSWIDTagIO::XercesSWIDTagIO() {
 
 
 XercesSWIDTagIO::~XercesSWIDTagIO() {
-	if (parser != NULL) {
+	if (parser != nullptr) {
 		deleteParser();
 	}
 
@@ -142,9 +142,9 @@ XercesSWIDTagIO::~XercesSWIDTagIO() {
 
 void XercesSWIDTagIO::deleteParser() {
 	delete parser;
-	parser = NULL;
+	parser = nullptr;
 	delete errHandler;
-	errHandler = NULL;
+	errHandler = nullptr;
 }
 
 
@@ -161,7 +161,7 @@ void XercesSWIDTagIO::createParser() {
 
 std::map<int, std::vector<DOMElement *> > XercesSWIDTagIO::subElementsOf(DOMElement * el) const {
 	auto result = createEmptyMap();
-	for (auto * sub_el = el->getFirstElementChild(); sub_el != NULL; sub_el = sub_el->getNextElementSibling()) {
+	for (auto * sub_el = el->getFirstElementChild(); sub_el != nullptr; sub_el = sub_el->getNextElementSibling()) {
 		if (XMLString::compareIString(sub_el->getTagName(), xmlch_entity) == 0) {
 			result[SWID_ELEMENT_ENTITY].push_back(sub_el);
 		} else if (XMLString::compareIString(sub_el->getTagName(), xmlch_link) == 0) {
@@ -173,7 +173,7 @@ std::map<int, std::vector<DOMElement *> > XercesSWIDTagIO::subElementsOf(DOMElem
 
 
 SWIDStruct XercesSWIDTagIO::load(const string & filename) {
-	if (parser != NULL) {
+	if (parser != nullptr) {
 		deleteParser();
 	}
 	createParser();

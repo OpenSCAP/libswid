@@ -2,7 +2,8 @@ import swid
 
 
 def _test_backend(backend_name):
-    backend = swid.get_swidtagio(backend_name)
+    backend = swid.SWIDTagIO()
+    backend.setBackend(backend_name);
     # TODO: This causes segfaults.
     """
     try:

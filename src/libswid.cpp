@@ -76,12 +76,19 @@ unsigned int swid_root_get_type(SWIDHandle data) {
  */
 
 SWIDIOHandle swid_create_io(const char * backend) {
-	return (SWIDIOHandle)get_swidtagio(backend);
+	SWIDIOHandle io = new SWIDTagIO();
+	try {
+		io->setBackend(backend);
+	} catch (...) {
+		return nullptr;
+	}
+
+	return io;
 }
 
 
 int swid_destroy_io(SWIDIOHandle io_handle) {
-	delete (SWIDTagIO *)io_handle;
+	delete (SWIDTagIOBase *)io_handle;
 	return 0;
 }
 
@@ -89,7 +96,7 @@ int swid_destroy_io(SWIDIOHandle io_handle) {
 int swid_load_root(SWIDIOHandle io_handle, const char * fname, SWIDHandle swid_structure) {
 	auto data = SWIDStruct();
 	try {
-		data = ((SWIDTagIO *)io_handle)->load(fname);
+		data = ((SWIDTagIOBase *)io_handle)->load(fname);
 	} catch (const XMLIOError & err) {
 		return 1;
 	}
@@ -99,7 +106,7 @@ int swid_load_root(SWIDIOHandle io_handle, const char * fname, SWIDHandle swid_s
 
 
 int swid_save_root(SWIDIOHandle io_handle, const char * fname, SWIDHandle data) {
-	auto * io = (SWIDTagIO *)io_handle;
+	auto * io = (SWIDTagIOBase *)io_handle;
 	try {
 		io->save(fname, * data);
 	} catch (const XMLIOError & err) {
