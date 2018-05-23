@@ -5,68 +5,68 @@
 #include "libswid.h"
 
 
-int swid_set_name(SWIDHandle data, const char * name) {
+int swid_root_set_name(SWIDHandle data, const char * name) {
 	data->name = name;
 	return 0;
 }
 
 
-const char * swid_get_name(SWIDHandle data) {
+const char * swid_root_get_name(SWIDHandle data) {
 	return data->name.c_str();
 }
 
 
-int swid_set_tagId(SWIDHandle data, const char * tagId) {
+int swid_root_set_tagId(SWIDHandle data, const char * tagId) {
 	data->tagId = tagId;
 	return 0;
 }
 
 
-const char * swid_get_tagId(SWIDHandle data) {
+const char * swid_root_get_tagId(SWIDHandle data) {
 	return data->tagId.c_str();
 }
 
 
-int swid_set_version(SWIDHandle data, const char * version) {
+int swid_root_set_version(SWIDHandle data, const char * version) {
 	data->version = version;
 	return 0;
 }
 
 
-const char * swid_get_version(SWIDHandle data) {
+const char * swid_root_get_version(SWIDHandle data) {
 	return data->version.c_str();
 }
 
 
-int swid_set_versionScheme(SWIDHandle data, const char * versionScheme) {
+int swid_root_set_versionScheme(SWIDHandle data, const char * versionScheme) {
 	data->versionScheme = versionScheme;
 	return 0;
 }
 
 
-const char * swid_get_versionScheme(SWIDHandle data) {
+const char * swid_root_get_versionScheme(SWIDHandle data) {
 	return data->versionScheme.c_str();
 }
 
 
-int swid_set_xml_lang(SWIDHandle data, const char * xml_lang) {
+int swid_root_set_xml_lang(SWIDHandle data, const char * xml_lang) {
 	data->xml_lang = xml_lang;
 	return 0;
 }
 
 
-const char * swid_get_xml_lang(SWIDHandle data) {
+const char * swid_root_get_xml_lang(SWIDHandle data) {
 	return data->xml_lang.c_str();
 }
 
 
-int swid_set_type(SWIDHandle data, unsigned int type) {
+int swid_root_set_type(SWIDHandle data, unsigned int type) {
 	data->type = (type_id)type;
 	return 0;
 }
 
 
-unsigned int swid_get_type(SWIDHandle data) {
+unsigned int swid_root_get_type(SWIDHandle data) {
 	return data->type;
 }
 
@@ -86,7 +86,7 @@ int swid_destroy_io(SWIDIOHandle io_handle) {
 }
 
 
-int swid_load_data(SWIDIOHandle io_handle, const char * fname, SWIDHandle swid_structure) {
+int swid_load_root(SWIDIOHandle io_handle, const char * fname, SWIDHandle swid_structure) {
 	auto data = SWIDStruct();
 	try {
 		data = ((SWIDTagIO *)io_handle)->load(fname);
@@ -98,7 +98,7 @@ int swid_load_data(SWIDIOHandle io_handle, const char * fname, SWIDHandle swid_s
 }
 
 
-int swid_save_data(SWIDIOHandle io_handle, const char * fname, SWIDHandle data) {
+int swid_save_root(SWIDIOHandle io_handle, const char * fname, SWIDHandle data) {
 	auto * io = (SWIDTagIO *)io_handle;
 	try {
 		io->save(fname, * data);
@@ -109,13 +109,13 @@ int swid_save_data(SWIDIOHandle io_handle, const char * fname, SWIDHandle data) 
 }
 
 
-SWIDHandle swid_get_empty_data() {
+SWIDHandle swid_create_root() {
 	auto * ret = new SWIDStruct();
 	return ret;
 }
 
 
-int swid_destroy_data(SWIDHandle data) {
+int swid_destroy_root(SWIDHandle data) {
 	delete ((SWIDStruct *)data);
 	return 0;
 }
@@ -125,7 +125,7 @@ int swid_destroy_data(SWIDHandle data) {
  */
 
 
-SWIDEntityHandle swid_get_empty_entity() {
+SWIDEntityHandle swid_create_entity() {
 	return new SWIDEntity();
 }
 
@@ -136,7 +136,7 @@ int swid_destroy_entity(SWIDEntityHandle entity) {
 }
 
 
-SWIDEntityHandle swid_get_entity(SWIDHandle swid, size_t index) {
+SWIDEntityHandle swid_root_get_entity(SWIDHandle swid, size_t index) {
 	if (index >= swid->entities.size()) {
 		return nullptr;
 	}
