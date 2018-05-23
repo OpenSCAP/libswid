@@ -30,10 +30,10 @@ void create_xml(const char * backend)
 	char output_fname[MAX_LEN];
 	snprintf(output_fname, MAX_LEN, "%s-c.xml", backend);
 
-	SWIDHandle swid = swid_get_empty_data();
-	SWIDHandle swid_loaded = swid_get_empty_data();
+	SWIDHandle swid = swid_create_root();
+	SWIDHandle swid_loaded = swid_create_root();
 
-	SWIDEntityHandle entity = swid_get_empty_entity();
+	SWIDEntityHandle entity = swid_create_entity();
 
         swid_entity_set_name(entity, entity_name);
         swid_entity_set_regid(entity, entity_regid);
@@ -42,37 +42,37 @@ void create_xml(const char * backend)
         swid_append_entity_data(swid, entity);
 	swid_destroy_entity(entity);
 
-	swid_set_name(swid, str_name);
-	swid_set_tagId(swid, str_tagId);
-	swid_set_version(swid, str_version);
-	swid_set_versionScheme(swid, str_versionScheme);
-	swid_set_xml_lang(swid, str_xml_lang);
+	swid_root_set_name(swid, str_name);
+	swid_root_set_tagId(swid, str_tagId);
+	swid_root_set_version(swid, str_version);
+	swid_root_set_versionScheme(swid, str_versionScheme);
+	swid_root_set_xml_lang(swid, str_xml_lang);
 
-	swid_set_type(swid, SWID_TYPE_CORPUS);
+	swid_root_set_type(swid, SWID_TYPE_CORPUS);
 
 	SWIDIOHandle io = swid_create_io(backend);
-	swid_save_data(io, output_fname, swid);
-	swid_load_data(io, output_fname, swid_loaded);
+	swid_save_root(io, output_fname, swid);
+	swid_load_root(io, output_fname, swid_loaded);
 	swid_destroy_io(io);
 
-	TEST_CHECK(strcmp(str_name, swid_get_name(swid_loaded)) == 0);
-	TEST_CHECK(strcmp(str_tagId, swid_get_tagId(swid_loaded)) == 0);
-	TEST_CHECK(strcmp(str_version, swid_get_version(swid_loaded)) == 0);
-	TEST_CHECK(strcmp(str_versionScheme, swid_get_versionScheme(swid_loaded)) == 0);
-	TEST_CHECK(strcmp(str_xml_lang, swid_get_xml_lang(swid_loaded)) == 0);
-	TEST_CHECK(SWID_TYPE_CORPUS == swid_get_type(swid_loaded));
+	TEST_CHECK(strcmp(str_name, swid_root_get_name(swid_loaded)) == 0);
+	TEST_CHECK(strcmp(str_tagId, swid_root_get_tagId(swid_loaded)) == 0);
+	TEST_CHECK(strcmp(str_version, swid_root_get_version(swid_loaded)) == 0);
+	TEST_CHECK(strcmp(str_versionScheme, swid_root_get_versionScheme(swid_loaded)) == 0);
+	TEST_CHECK(strcmp(str_xml_lang, swid_root_get_xml_lang(swid_loaded)) == 0);
+	TEST_CHECK(SWID_TYPE_CORPUS == swid_root_get_type(swid_loaded));
 
         /* There is exactly one entity. */
-        entity = swid_get_entity(swid, 0);
+        entity = swid_root_get_entity(swid, 0);
 	TEST_CHECK(entity != NULL);
-	TEST_CHECK(swid_get_entity(swid, 1) == NULL);
+	TEST_CHECK(swid_root_get_entity(swid, 1) == NULL);
 
 	TEST_CHECK(strcmp(swid_entity_get_name(entity), entity_name) == 0);
 	TEST_CHECK(strcmp(swid_entity_get_regid(entity), entity_regid) == 0);
 	TEST_CHECK(swid_entity_get_role(entity) == entity_role);
 
-	swid_destroy_data(swid_loaded);
-	swid_destroy_data(swid);
+	swid_destroy_root(swid_loaded);
+	swid_destroy_root(swid);
 }
 
 

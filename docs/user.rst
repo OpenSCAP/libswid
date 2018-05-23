@@ -48,7 +48,13 @@ C
 +
 
 Just include ``<libswid.h>``.
-The ``C`` interface also mimicks the ``C++`` interface:
+The ``C`` interface also mimicks the ``C++`` interface.
+
+* There are quasi-getters and quasi-setters for individual elements, e.g. ``swid_get_root_name``, ``swid_set_entity_name``, generally ``swid_(get|set)_<structure name>_property``.
+* You create new structures by calling ``swid_create_<structure name>`` and destroy them by ``swid_destroy_<structure name>``.
+* Whatever you create, you must destroy to avoid memory leaks.
+  When you e.g. create an ``Enrity`` and append it to list of entities to the root of the SWID tag, the tag root data structure uses a copy of your created entity.
+  When you obtain something using a quasi-getter, you obtain a reference, therefore, don't destroy it.
 
 .. literalinclude:: examples/report_creator_entity.c
    :language: C
