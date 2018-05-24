@@ -3,7 +3,6 @@
 #include "catch.hpp"
 
 #include "SWIDStruct.h"
-#include "loader-tinyxml.h"
 #include "Translator.h"
 
 using std::string;

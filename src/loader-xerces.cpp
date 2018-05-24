@@ -258,3 +258,4 @@ DOMElement * XercesSWIDTagIO::createSubElement(DOMElement * pRoot, int element_t
 void XercesSWIDTagIO::saveToFile(const std::string & filename) {
 	OutputXML(doc, filename);
 }
+src/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.h

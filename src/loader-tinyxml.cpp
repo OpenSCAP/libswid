@@ -93,3 +93,4 @@ void TiXMLSWIDTagIO::saveToFile(const std::string & filename) {
 		throw create_save_error(filename, doc.ErrorDesc());
 	}
 }
+src/loader-tinyxml.hsrc/loader-tinyxml.hsrc/loader-tinyxml.hsrc/loader-tinyxml.hsrc/loader-tinyxml.hsrc/loader-tinyxml.hsrc/loader-tinyxml.hsrc/loader-tinyxml.hsrc/loader-tinyxml.h

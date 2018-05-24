@@ -7,14 +7,37 @@ project(libswid)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-file(GLOB_RECURSE sources      src/*.cpp src/*.h)
+file(GLOB_RECURSE sources
+	src/loader-generic.cpp src/loader-generic.h
+	src/loader-generic-notemplate.cpp
+	src/libswid
+	src/libswid.h
+	src/lib.cpp src/lib.h
+	src/swid-common.h
+	src/SWIDStruct.cpp src/SWIDStruct.h
+	src/Translator.cpp src/Translator.h
+)
+
 file(GLOB_RECURSE sources_test_cxx test/unit/*.cpp)
 file(GLOB_RECURSE sources_test_c test/unit/*.c)
 # You can use set(sources src/main.cpp) etc if you don't want to
 # use globbing to find files automatically.
 
-find_package(XercesC)
-find_package(TinyXML)
+option(BUILD_XERCES_BACKEND "Whether to build Xerces-C backend" ON)
+option(BUILD_TINYXML_BACKEND "Whether to build TinyXML backend" ON)
+
+if (BUILD_XERCES_BACKEND)
+	find_package(XercesC)
+	add_definitions(-DHAVE_XERCES_C)
+	file(APPEND src/loader-xerces.cpp src/loader-xerces.h)
+endif()
+
+if (BUILD_TINYXML_BACKEND)
+	find_package(TinyXML)
+	add_definitions(-DHAVE_TINYXML)
+	file(APPEND src/loader-tinyxml.cpp src/loader-tinyxml.h)
+endif()
+
 find_package(SWIG)
 
 set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4)
@@ -101,7 +124,19 @@ set(CTEST_ENVIRONMENT "PYTHONPATH=.")
 
 add_test (NAME "Unit-C++" COMMAND unit_tests++)
 add_test (NAME "Unit-C" COMMAND unit_tests)
-add_test (NAME "resaving" COMMAND resaver)
+
+set(SWID_VALIDATOR CACHE FILEPATH "Path to the swid validator .jar")
+
+if (SWID_VALIDATOR)
+add_test (NAME "resaving" COMMAND
+	${CMAKE_CURRENT_SOURCE_DIR}/test/integration/resave.sh
+	${SWID_VALIDATOR}
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/samples/Vault/Enterprise_Vault_Server.swidtag
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/samples/Vault/Enterprise_Vault.swidtag
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/samples/Vault/Enterprise_Vault_Outlook_Add-in.swidtag
+)
+endif()
+
 add_test (NAME "python-bindings" COMMAND py.test-3 ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/test.py)
 add_test (NAME "doc-examples" COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/test-examples.sh "tinyxml.xml"
 	"./example-c++"

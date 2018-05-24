@@ -24,8 +24,19 @@
 
 #include "lib.h"
 
+#ifdef HAVE_XERCES
 #include "loader-xerces.h"
+#define NEW_XERCES_IO new XercesSWIDTagIO()
+#else
+#define NEW_XERCES_IO NULL
+#endif
+
+#ifdef HAVE_TINYXML
 #include "loader-tinyxml.h"
+#define NEW_TINYXML_IO new TiXMLSWIDTagIO()
+#else
+#define NEW_TINYXML_IO NULL
+#endif
 
 
 XMLIOError::XMLIOError(const std::string & what_arg):std::runtime_error(what_arg) {
@@ -42,9 +53,9 @@ SWIDTagIOBase::~SWIDTagIOBase() {
 
 static SWIDTagIOBase * get_swidtagio(const char * type) {
 	if (strcmp(type, "tinyxml") == 0) {
-		return new TiXMLSWIDTagIO();
+		return NEW_TINYXML_IO;
 	} else if (strcmp(type, "xerces") == 0) {
-		return new XercesSWIDTagIO();
+		return NEW_XERCES_IO;
 	} else {
 		std::ostringstream msg;
 		msg << "Unable to set backend to '"
