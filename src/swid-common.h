@@ -10,6 +10,13 @@ enum type_id {SWID_TYPE_PRIMARY, SWID_TYPE_CORPUS, SWID_TYPE_PATCH, SWID_TYPE_SU
 
 
 /**
+ * SWID validity codes
+ *
+ * A SWID tag may be valid, invalid, or we can't tell
+ */
+enum validity {SWID_VALIDITY_VALID, SWID_VALIDITY_INVALID, SWID_VALIDITY_UNKNOWN};
+
+/**
  * SWID Entity Roles
  *
  * An entity has at least one role. More than one role at the same time are allowed.

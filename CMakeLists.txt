@@ -7,11 +7,11 @@ project(libswid)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-file(GLOB_RECURSE sources
+list(APPEND sources
 	src/loader-generic.cpp src/loader-generic.h
 	src/loader-generic-notemplate.cpp
 	src/libswid
-	src/libswid.h
+	src/libswid.cpp src/libswid.h
 	src/lib.cpp src/lib.h
 	src/swid-common.h
 	src/SWIDStruct.cpp src/SWIDStruct.h
@@ -28,14 +28,25 @@ option(BUILD_TINYXML_BACKEND "Whether to build TinyXML backend" ON)
 
 if (BUILD_XERCES_BACKEND)
 	find_package(XercesC)
-	add_definitions(-DHAVE_XERCES_C)
-	file(APPEND src/loader-xerces.cpp src/loader-xerces.h)
+	if (NOT XercesC_FOUND)
+		set(BUILD_XERCES_BACKEND OFF)
+	endif()
+endif()
+if (BUILD_XERCES_BACKEND)
+	add_definitions(-DHAVE_XERCES)
+	add_definitions(-DSCHEMA_ABS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/schema/schema.xsd")
+	list(APPEND sources src/loader-xerces.cpp src/loader-xerces.h)
 endif()
 
 if (BUILD_TINYXML_BACKEND)
 	find_package(TinyXML)
+	if (NOT TINYXML_FOUND)
+		set(BUILD_TINYXML_BACKEND OFF)
+	endif()
+endif()
+if (BUILD_TINYXML_BACKEND)
 	add_definitions(-DHAVE_TINYXML)
-	file(APPEND src/loader-tinyxml.cpp src/loader-tinyxml.h)
+	list(APPEND sources src/loader-tinyxml.cpp src/loader-tinyxml.h)
 endif()
 
 find_package(SWIG)
@@ -127,6 +138,12 @@ add_test (NAME "Unit-C" COMMAND unit_tests)
 
 set(SWID_VALIDATOR CACHE FILEPATH "Path to the swid validator .jar")
 
+add_test (NAME "python-bindings" COMMAND py.test-3 ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/test.py)
+add_test (NAME "doc-examples" COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/test-examples.sh "tinyxml.xml"
+	"./example-c++"
+	"./example-c"
+	"${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/report_creator_entity.py")
+
 if (SWID_VALIDATOR)
 add_test (NAME "resaving" COMMAND
 	${CMAKE_CURRENT_SOURCE_DIR}/test/integration/resave.sh
@@ -136,12 +153,6 @@ add_test (NAME "resaving" COMMAND
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/samples/Vault/Enterprise_Vault_Outlook_Add-in.swidtag
 )
 endif()
-
-add_test (NAME "python-bindings" COMMAND py.test-3 ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/test.py)
-add_test (NAME "doc-examples" COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/test-examples.sh "tinyxml.xml"
-	"./example-c++"
-	"./example-c"
-	"${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/report_creator_entity.py")
 
 
 set_tests_properties("python-bindings" PROPERTIES ENVIRONMENT PYTHONPATH=.)

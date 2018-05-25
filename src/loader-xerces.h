@@ -38,6 +38,8 @@ public:
 	virtual SWIDStruct load(const std::string & filename) override;
 	virtual void save(const std::string & filename, const SWIDStruct & what) override;
 
+	virtual validity is_xsd_valid(const std::string & filename) override;
+
 private:
 	void deleteParser();
 	void createParser();

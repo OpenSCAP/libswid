@@ -4,6 +4,7 @@
 
 #include "SWIDStruct.h"
 #include "Translator.h"
+#include "lib.h"
 
 using std::string;
 using std::regex;
@@ -80,6 +81,8 @@ void check(string parser_name) {
 		swid.type = SWID_TYPE_CORPUS;
 
 		loader.save(fname, swid);
+
+		REQUIRE( loader.is_xsd_valid(fname) != SWID_VALIDITY_VALID );
 
 		auto loaded_swid = loader.load(fname);
 		REQUIRE( loaded_swid.name == swid.name );

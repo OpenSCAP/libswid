@@ -50,6 +50,10 @@ public:
 	 * Save a SWIDStruct instance to an XML file.
 	 */
 	virtual void save(const std::string & filename, const SWIDStruct & what) = 0;
+	/**
+	 * Assess schema validity of the file.
+	 */
+	virtual validity is_xsd_valid(const std::string & filename);
 };
 
 
@@ -63,6 +67,7 @@ public:
 
 	SWIDStruct load(const std::string & filename) override;
 	void save(const std::string & filename, const SWIDStruct & what) override;
+	virtual validity is_xsd_valid(const std::string & filename) override;
 
 private:
 	std::string current_backend;

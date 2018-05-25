@@ -208,6 +208,23 @@ void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
 }
 
 
+validity XercesSWIDTagIO::is_xsd_valid(const std::string & filename) {
+	if (parser != nullptr) {
+		deleteParser();
+	}
+	createParser();
+
+	parser->setValidationSchemaFullChecking(true);
+	parser->setExternalNoNamespaceSchemaLocation(SCHEMA_ABS_PATH);
+
+	parser->parse(filename.c_str());
+	if(parser->getErrorCount() != 0) {
+		return SWID_VALIDITY_INVALID;
+	}
+	return SWID_VALIDITY_VALID;
+}
+
+
 DOMElement * XercesSWIDTagIO::readRoot(const string & filename) {
 	parser->parse(filename.c_str());
 	doc = parser->getDocument();
@@ -258,4 +275,3 @@ DOMElement * XercesSWIDTagIO::createSubElement(DOMElement * pRoot, int element_t
 void XercesSWIDTagIO::saveToFile(const std::string & filename) {
 	OutputXML(doc, filename);
 }
-src/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.hsrc/loader-xerces.h

@@ -20,7 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-// TODO: Make a script that inserts and updates the copyright claim in cpp files
+#include <sstream>
 
 #include "lib.h"
 
@@ -51,17 +51,24 @@ SWIDTagIOBase::~SWIDTagIOBase() {
 }
 
 
+validity SWIDTagIOBase::is_xsd_valid(const std::string & filename) {
+	return SWID_VALIDITY_UNKNOWN;
+}
+
+
 static SWIDTagIOBase * get_swidtagio(const char * type) {
+	SWIDTagIOBase * ret = nullptr;
 	if (strcmp(type, "tinyxml") == 0) {
-		return NEW_TINYXML_IO;
+		ret = NEW_TINYXML_IO;
 	} else if (strcmp(type, "xerces") == 0) {
-		return NEW_XERCES_IO;
+		ret = NEW_XERCES_IO;
 	} else {
-		std::ostringstream msg;
-		msg << "Unable to set backend to '"
-			<< type << "': Backend not known.";
-		throw std::runtime_error(msg.str());
+		throw std::runtime_error("Backend not known");
 	}
+	if (ret == nullptr) {
+		throw std::runtime_error("Backend known, but not supported.");
+	}
+	return ret;
 }
 
 
@@ -79,8 +86,17 @@ SWIDTagIO::~SWIDTagIO() {
 void SWIDTagIO::setBackend(const std::string & backend_name) {
 	if (backend != nullptr) {
 		delete backend;
+		current_backend = "";
 	}
-	backend = get_swidtagio(backend_name.c_str());
+	try {
+	    backend = get_swidtagio(backend_name.c_str());
+	} catch (const std::runtime_error & exc) {
+		std::ostringstream msg;
+		msg << "Unable to set backend to '"
+			<< backend_name << "': "
+			<< exc.what() << ".\n";
+		throw std::runtime_error(msg.str());
+	}
 	current_backend = backend_name;
 }
 
@@ -98,4 +114,9 @@ void SWIDTagIO::save(const std::string & filename, const SWIDStruct & what) {
 		throw std::runtime_error("No backend has been set, call setBackend first.");
 	}
 	return backend->save(filename, what);
+}
+
+
+validity SWIDTagIO::is_xsd_valid(const std::string & filename) {
+	return backend->is_xsd_valid(filename);
 }
