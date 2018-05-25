@@ -22,7 +22,7 @@
 
 #include <sstream>
 
-#include "lib.h"
+#include "libswid-base.h"
 
 #ifdef HAVE_XERCES
 #include "loader-xerces.h"

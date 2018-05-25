@@ -20,3 +20,11 @@ $ mkdir -p build && cd build && rm -rf *
 $ cmake .. && make && make test
 $ make lcov && xdg-open lcov/html/all_targets/index.html
 ```
+
+If you have downloaded the [SWID validator](https://csrc.nist.gov/Projects/Software-Identification-SWID/resources), extract it and pass the path to the validator `.jar` to Cmake like this:
+
+```
+cmake -DSWID_VALIDATOR=/path/to/validator/swid/swidval-0.5.0.jar ..
+```
+
+Then, the test suite will use it in some of the tests.

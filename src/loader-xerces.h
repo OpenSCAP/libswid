@@ -23,7 +23,7 @@
 
 #include <map>
 
-#include "lib.h"
+#include "libswid-base.h"
 #include "loader-generic.h"
 
 #include <xercesc/parsers/XercesDOMParser.hpp>

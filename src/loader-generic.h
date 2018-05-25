@@ -22,7 +22,7 @@
 #pragma once
 
 #include <map>
-#include "lib.h"
+#include "libswid-base.h"
 
 #define SWID_NS "http://standards.iso.org/iso/19770/-2/2015/schema.xsd"
 

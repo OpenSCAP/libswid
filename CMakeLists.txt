@@ -7,15 +7,21 @@ project(libswid)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-list(APPEND sources
-	src/loader-generic.cpp src/loader-generic.h
-	src/loader-generic-notemplate.cpp
-	src/libswid
-	src/libswid.cpp src/libswid.h
-	src/lib.cpp src/lib.h
-	src/swid-common.h
-	src/SWIDStruct.cpp src/SWIDStruct.h
-	src/Translator.cpp src/Translator.h
+list(APPEND private_sources
+	${CMAKE_CURRENT_SOURCE_DIR}/src/loader-generic.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/loader-generic.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/loader-generic-notemplate.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/libswid.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/libswid-base.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/SWIDStruct.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/SWIDStruct.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Translator.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/Translator.h
+)
+
+# We can't include extension-less files here, because they puzzle the coverage support:
+# -> no append of ${CMAKE_CURRENT_SOURCE_DIR}/src/libswid
+list(APPEND public_sources
+	${CMAKE_CURRENT_SOURCE_DIR}/src/libswid.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/libswid-base.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/swid-common.h
 )
 
 file(GLOB_RECURSE sources_test_cxx test/unit/*.cpp)
@@ -28,31 +34,34 @@ option(BUILD_TINYXML_BACKEND "Whether to build TinyXML backend" ON)
 
 if (BUILD_XERCES_BACKEND)
 	find_package(XercesC)
-	if (NOT XercesC_FOUND)
+	if (NOT ${XercesC_FOUND})
 		set(BUILD_XERCES_BACKEND OFF)
 	endif()
 endif()
 if (BUILD_XERCES_BACKEND)
 	add_definitions(-DHAVE_XERCES)
 	add_definitions(-DSCHEMA_ABS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/schema/schema.xsd")
-	list(APPEND sources src/loader-xerces.cpp src/loader-xerces.h)
+	list(APPEND private_sources
+		${CMAKE_CURRENT_SOURCE_DIR}/src/loader-xerces.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/loader-xerces.h
+	)
 endif()
 
 if (BUILD_TINYXML_BACKEND)
 	find_package(TinyXML)
-	if (NOT TINYXML_FOUND)
+	if (NOT ${TINYXML_FOUND})
 		set(BUILD_TINYXML_BACKEND OFF)
 	endif()
 endif()
 if (BUILD_TINYXML_BACKEND)
 	add_definitions(-DHAVE_TINYXML)
-	list(APPEND sources src/loader-tinyxml.cpp src/loader-tinyxml.h)
+	list(APPEND private_sources
+		${CMAKE_CURRENT_SOURCE_DIR}/src/loader-tinyxml.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/loader-tinyxml.h
+	)
 endif()
 
 find_package(SWIG)
 
-set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4)
-find_package(PythonLibs)
+find_package(PythonLibs 3)
 
 ###############################################################################
 ## target definitions #########################################################
@@ -68,7 +77,8 @@ find_package(PythonLibs)
 # This allows to include files relative to the root of the src directory with a <> pair
 # target_include_directories(swid-util PUBLIC src)
 
-add_library(swid SHARED ${sources})
+add_library(swid SHARED)
+target_sources(swid PUBLIC ${public_sources} PRIVATE ${private_sources})
 
 # target_link_libraries(swid-util swid)
 
@@ -99,7 +109,7 @@ target_include_directories(${SWIG_MODULE_swid_REAL_NAME} PUBLIC src ${PYTHON_INC
 
 add_executable(unit_tests++ ${sources_test_cxx})
 add_executable(unit_tests ${sources_test_c})
-add_executable(resaver ${sources} test/integration/resaver.cpp)
+add_executable(resaver test/integration/resaver.cpp)
 
 # Don't include libswid as a library, use sources.
 # Not having explicit sources would destroy the coverage analysis.
@@ -108,6 +118,7 @@ add_executable(resaver ${sources} test/integration/resaver.cpp)
 # target_link_libraries(unit_tests PUBLIC swid)
 target_link_libraries(unit_tests++ PRIVATE swid)
 target_link_libraries(unit_tests PRIVATE swid)
+target_link_libraries(resaver PRIVATE swid)
 
 # This define is added to prevent collision with the main.
 # It might be better solved by not adding the source with the main to the
@@ -177,7 +188,7 @@ coverage_evaluate()
 install(TARGETS swid
 	LIBRARY DESTINATION lib)
 install(FILES src/include/libswid DESTINATION include)
-install(FILES src/lib.h src/SWIDStruct.h DESTINATION include/swid)
+install(FILES src/libswid-base.h src/SWIDStruct.h DESTINATION include/swid)
 
 # Now comes everything we need, to create a package
 # there are a lot more variables you can set, and some

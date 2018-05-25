@@ -11,6 +11,6 @@
 %template(entities_vector) std::vector<SWIDEntity>;
 
 /* Can't use -includeall because it would include STL include files */
-%include <lib.h>
+%include <libswid-base.h>
 %include <SWIDStruct.h>
 %include <swid-common.h>

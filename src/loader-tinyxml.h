@@ -21,7 +21,7 @@
  */
 #pragma once
 
-#include "lib.h"
+#include "libswid-base.h"
 
 #include <tinyxml.h>
 

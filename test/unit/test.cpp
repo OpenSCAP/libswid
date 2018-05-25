@@ -4,7 +4,7 @@
 
 #include "SWIDStruct.h"
 #include "Translator.h"
-#include "lib.h"
+#include "libswid-base.h"
 
 using std::string;
 using std::regex;

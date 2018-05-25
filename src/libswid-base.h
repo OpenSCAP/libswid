@@ -28,6 +28,11 @@
 #include "SWIDStruct.h"
 
 
+#ifdef SWIG
+// Older versions of SWIG may be puzzled by the 'override' keyword
+#define override
+#endif
+
 
 class XMLIOError : public std::runtime_error
 {

@@ -1,6 +1,6 @@
 #include <cstring>
 
-#include "lib.h"
+#include "libswid-base.h"
 
 #include "libswid.h"
 
