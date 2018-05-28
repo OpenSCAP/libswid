@@ -58,7 +58,7 @@ public:
 	/**
 	 * Assess schema validity of the file.
 	 */
-	virtual validity is_xsd_valid(const std::string & filename);
+	virtual validity isXSDValid(const std::string & filename);
 };
 
 
@@ -72,7 +72,7 @@ public:
 
 	SWIDStruct load(const std::string & filename) override;
 	void save(const std::string & filename, const SWIDStruct & what) override;
-	virtual validity is_xsd_valid(const std::string & filename) override;
+	virtual validity isXSDValid(const std::string & filename) override;
 
 private:
 	std::string current_backend;

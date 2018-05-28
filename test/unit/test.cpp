@@ -14,37 +14,37 @@ using std::regex_match;
 TEST_CASE( "Utilities" ) {
 	SECTION("Role parsing") {
 		auto role = Role();
-		REQUIRE( role.RoleAsString() == "" );
+		REQUIRE( role.roleAsString() == "" );
 
 		role = Role(SWID_ROLE_AGGREGATOR | SWID_ROLE_LICENSOR);
-		REQUIRE( role.RoleAsString() == "aggregator licensor" );
+		REQUIRE( role.roleAsString() == "aggregator licensor" );
 
 		role = Role(SWID_ROLE_DISTRIBUTOR | SWID_ROLE_SOFTWARE_CREATOR | SWID_ROLE_TAG_CREATOR);
-		REQUIRE( role.RoleAsString() == "distributor softwareCreator tagCreator" );
+		REQUIRE( role.roleAsString() == "distributor softwareCreator tagCreator" );
 
 		role = Role("  distributor ");
-		REQUIRE( (role.RoleAsId() & SWID_ROLE_DISTRIBUTOR) );
+		REQUIRE( (role.roleAsId() & SWID_ROLE_DISTRIBUTOR) );
 
 		role = Role("  distributor_");
-		REQUIRE( role.RoleAsId() == SWID_ROLE_NONE );
+		REQUIRE( role.roleAsId() == SWID_ROLE_NONE );
 
 		role = Role("licensor softwarecreator aggregator tagCreator");
-		REQUIRE( (role.RoleAsId() & SWID_ROLE_SOFTWARE_CREATOR) == SWID_ROLE_NONE );
+		REQUIRE( (role.roleAsId() & SWID_ROLE_SOFTWARE_CREATOR) == SWID_ROLE_NONE );
 
 		auto real_role = SWID_ROLE_AGGREGATOR | SWID_ROLE_LICENSOR | SWID_ROLE_TAG_CREATOR;
-		REQUIRE( (role.RoleAsId() & real_role) == real_role);
-		REQUIRE( (role.RoleAsId() & (~real_role)) == 0);
+		REQUIRE( (role.roleAsId() & real_role) == real_role);
+		REQUIRE( (role.roleAsId() & (~real_role)) == 0);
 
 		real_role = SWID_ROLE_TAG_CREATOR | SWID_ROLE_SOFTWARE_CREATOR;
-		REQUIRE( (Role("softwareCreator tagCreator").RoleAsId() & (~real_role)) == 0 );
-		REQUIRE( (Role("softwareCreator tagCreator").RoleAsId() & real_role) == real_role );
+		REQUIRE( (Role("softwareCreator tagCreator").roleAsId() & (~real_role)) == 0 );
+		REQUIRE( (Role("softwareCreator tagCreator").roleAsId() & real_role) == real_role );
 	}
 
 }
 
 
 void check(string parser_name) {
-	auto loader = SWIDTagIO();
+	SWIDTagIO loader;
 	loader.setBackend(parser_name.c_str());
 	SWIDStruct swid;
 	SECTION(parser_name + ": Sanity") {
@@ -73,7 +73,7 @@ void check(string parser_name) {
 	SWIDEntity entity;
 	entity.name = "The ACME corporation";
 	entity.regid = "acme.com";
-	entity.role = Role(SWID_ROLE_SOFTWARE_CREATOR | SWID_ROLE_TAG_CREATOR).RoleAsId();
+	entity.role = Role(SWID_ROLE_SOFTWARE_CREATOR | SWID_ROLE_TAG_CREATOR).roleAsId();
 
 	swid.entities.push_back(entity);
 
@@ -82,7 +82,7 @@ void check(string parser_name) {
 
 		loader.save(fname, swid);
 
-		REQUIRE( loader.is_xsd_valid(fname) != SWID_VALIDITY_VALID );
+		REQUIRE( loader.isXSDValid(fname) != SWID_VALIDITY_VALID );
 
 		auto loaded_swid = loader.load(fname);
 		REQUIRE( loaded_swid.name == swid.name );
@@ -103,7 +103,7 @@ void check(string parser_name) {
 
 		SWIDEntity entity2;
 		entity2.name = "Red Hat";
-		entity2.role = Role("distributor").RoleAsId();
+		entity2.role = Role("distributor").roleAsId();
 		swid.entities.push_back(entity2);
 
 		swid.version = "1.2.3";

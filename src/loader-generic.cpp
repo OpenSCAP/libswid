@@ -66,7 +66,7 @@ void XMLIO<el_t>::addEntities(SWIDStruct & subject, const std::vector<el_t *> & 
 		entity.name = extractAttrValue(* it, "name");
 		entity.regid = extractAttrValue(* it, "regid");
 		role = extractAttrValue(* it, "role");
-		entity.role = Role(role).RoleAsId();
+		entity.role = Role(role).roleAsId();
 		subject.entities.push_back(entity);
 	}
 }
@@ -103,7 +103,7 @@ void XMLIO<el_t>::save(const std::string & filename, const SWIDStruct & what) {
 		el_t * el = createSubElement(pRoot, SWID_ELEMENT_ENTITY);
 		setAttrValue(el, "name", it->name);
 		setAttrValue(el, "regid", it->regid);
-		setAttrValue(el, "role", Role(it->role).RoleAsString());
+		setAttrValue(el, "role", Role(it->role).roleAsString());
 	}
 
 	for (auto it = what.links.begin(); it != what.links.end(); it++) {

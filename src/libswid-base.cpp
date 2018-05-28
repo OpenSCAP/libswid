@@ -51,7 +51,7 @@ SWIDTagIOBase::~SWIDTagIOBase() {
 }
 
 
-validity SWIDTagIOBase::is_xsd_valid(const std::string & filename) {
+validity SWIDTagIOBase::isXSDValid(const std::string & filename) {
 	return SWID_VALIDITY_UNKNOWN;
 }
 
@@ -117,6 +117,6 @@ void SWIDTagIO::save(const std::string & filename, const SWIDStruct & what) {
 }
 
 
-validity SWIDTagIO::is_xsd_valid(const std::string & filename) {
-	return backend->is_xsd_valid(filename);
+validity SWIDTagIO::isXSDValid(const std::string & filename) {
+	return backend->isXSDValid(filename);
 }

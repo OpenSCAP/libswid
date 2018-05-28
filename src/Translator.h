@@ -33,8 +33,8 @@ public:
 	explicit Role(std::string);
 	explicit Role(role_id);
 
-	std::string RoleAsString() const;
-	role_id RoleAsId() const;
+	std::string roleAsString() const;
+	role_id roleAsId() const;
 
 private:
 	role_id role;

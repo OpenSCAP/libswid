@@ -117,6 +117,7 @@ XercesSWIDTagIO::XercesSWIDTagIO() {
 		throw(msg.str());
 	}
 	parser = nullptr;
+	doc = nullptr;
 
 	swid_ns = X(SWID_NS);
 	xmlch_entity = X("Entity");
@@ -208,7 +209,7 @@ void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
 }
 
 
-validity XercesSWIDTagIO::is_xsd_valid(const std::string & filename) {
+validity XercesSWIDTagIO::isXSDValid(const std::string & filename) {
 	if (parser != nullptr) {
 		deleteParser();
 	}

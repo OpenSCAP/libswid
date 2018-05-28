@@ -65,7 +65,7 @@ Role::Role(role_id id): role(id) {
 }
 
 
-string Role::RoleAsString() const {
+string Role::roleAsString() const {
 	auto ret = string();
 	for (auto it = role_id_map.begin(); it != role_id_map.end(); it++)
 	{
@@ -80,7 +80,7 @@ string Role::RoleAsString() const {
 }
 
 
-role_id Role::RoleAsId() const {
+role_id Role::roleAsId() const {
 	return role;
 }
 
