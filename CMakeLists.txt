@@ -8,60 +8,60 @@ project(libswid)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 list(APPEND private_sources
-	${CMAKE_CURRENT_SOURCE_DIR}/src/loader-generic.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/loader-generic.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/loader-generic-notemplate.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/libswid.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/libswid-base.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/SWIDStruct.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/SWIDStruct.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Translator.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/Translator.h
+	${CMAKE_SOURCE_DIR}/src/loader-generic.cpp ${CMAKE_SOURCE_DIR}/src/loader-generic.h
+	${CMAKE_SOURCE_DIR}/src/loader-generic-notemplate.cpp
+	${CMAKE_SOURCE_DIR}/src/libswid.cpp
+	${CMAKE_SOURCE_DIR}/src/libswid-base.cpp
+	${CMAKE_SOURCE_DIR}/src/SWIDStruct.cpp ${CMAKE_SOURCE_DIR}/src/SWIDStruct.h
+	${CMAKE_SOURCE_DIR}/src/Translator.cpp ${CMAKE_SOURCE_DIR}/src/Translator.h
 )
 
 # We can't include extension-less files here, because they puzzle the coverage support:
-# -> no append of ${CMAKE_CURRENT_SOURCE_DIR}/src/libswid
+# -> no append of ${CMAKE_SOURCE_DIR}/src/libswid
 list(APPEND public_sources
-	${CMAKE_CURRENT_SOURCE_DIR}/src/libswid.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/libswid-base.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/swid-common.h
+	${CMAKE_SOURCE_DIR}/src/libswid.h
+	${CMAKE_SOURCE_DIR}/src/libswid-base.h
+	${CMAKE_SOURCE_DIR}/src/swid-common.h
 )
 
-file(GLOB_RECURSE sources_test_cxx test/unit/*.cpp)
-file(GLOB_RECURSE sources_test_c test/unit/*.c)
 # You can use set(sources src/main.cpp) etc if you don't want to
 # use globbing to find files automatically.
 
-option(BUILD_XERCES_BACKEND "Whether to build Xerces-C backend" ON)
-option(BUILD_TINYXML_BACKEND "Whether to build TinyXML backend" ON)
+find_package(XercesC)
+find_package(TinyXML)
+
+find_package(SWIG)
+find_package(PythonLibs 3)
+
+find_package(codecov)
+
+include(CMakeDependentOption)
+
+CMAKE_DEPENDENT_OPTION(BUILD_XERCES_BACKEND "Whether to build Xerces-C backend" ON ${XercesC_FOUND} OFF)
+CMAKE_DEPENDENT_OPTION(BUILD_TINYXML_BACKEND "Whether to build TinyXML backend" ON ${TinyXML_FOUND} OFF)
+CMAKE_DEPENDENT_OPTION(BUILD_PYTHON_BINDINGS "Whether to build Python3 bindings" ON ${SWIG_FOUND} OFF)
 
 if (BUILD_XERCES_BACKEND)
-	find_package(XercesC)
-	if (NOT ${XercesC_FOUND})
-		set(BUILD_XERCES_BACKEND OFF)
-	endif()
-endif()
-if (BUILD_XERCES_BACKEND)
 	add_definitions(-DHAVE_XERCES)
-	add_definitions(-DSCHEMA_ABS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/schema/schema.xsd")
+	add_definitions(-DSCHEMA_ABS_PATH="${CMAKE_SOURCE_DIR}/resources/schema/schema.xsd")
 	list(APPEND private_sources
-		${CMAKE_CURRENT_SOURCE_DIR}/src/loader-xerces.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/loader-xerces.h
+		${CMAKE_SOURCE_DIR}/src/loader-xerces.cpp ${CMAKE_SOURCE_DIR}/src/loader-xerces.h
 	)
 endif()
 
-if (BUILD_TINYXML_BACKEND)
-	find_package(TinyXML)
-	if (NOT ${TINYXML_FOUND})
-		set(BUILD_TINYXML_BACKEND OFF)
-	endif()
-endif()
 if (BUILD_TINYXML_BACKEND)
 	add_definitions(-DHAVE_TINYXML)
 	list(APPEND private_sources
-		${CMAKE_CURRENT_SOURCE_DIR}/src/loader-tinyxml.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/loader-tinyxml.h
+		${CMAKE_SOURCE_DIR}/src/loader-tinyxml.cpp ${CMAKE_SOURCE_DIR}/src/loader-tinyxml.h
 	)
 endif()
 
-find_package(SWIG)
-
-find_package(PythonLibs 3)
+message(STATUS "Xerces-c library found: ${XercesC_FOUND}")
+message(STATUS "TinyXML library found: ${TinyXML_FOUND}")
+message(STATUS "SWIG found: ${SWIG_FOUND}")
+message(STATUS "Building Xerces-c XML backend: ${BUILD_XERCES_BACKEND}")
+message(STATUS "Building TinyXML XML backend: ${BUILD_TINYXML_BACKEND}")
+message(STATUS "Building Python 3 bindings: ${BUILD_PYTHON_BINDINGS}")
 
 ###############################################################################
 ## target definitions #########################################################
@@ -77,6 +77,7 @@ find_package(PythonLibs 3)
 # This allows to include files relative to the root of the src directory with a <> pair
 # target_include_directories(swid-util PUBLIC src)
 
+
 add_library(swid SHARED)
 target_sources(swid PUBLIC ${public_sources} PRIVATE ${private_sources})
 
@@ -91,93 +92,25 @@ target_link_libraries(swid ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
 # We need this, because we want to work with paths relative to the executable.
 file(COPY ${data} DESTINATION resources)
 
+if (BUILD_PYTHON_BINDINGS)
+	include(${SWIG_USE_FILE})
 
-include(${SWIG_USE_FILE})
+	set_property(SOURCE ${CMAKE_SOURCE_DIR}/src/swig/swid.i PROPERTY CPLUSPLUS ON)
+	set_property(SOURCE ${CMAKE_SOURCE_DIR}/src/swig/swid.i PROPERTY SWIG_FLAGS -py3 -modern -safecstrings -I${CMAKE_SOURCE_DIR}/src)
 
-set_property(SOURCE src/swig/swid.i PROPERTY CPLUSPLUS ON)
-set_property(SOURCE src/swig/swid.i PROPERTY SWIG_FLAGS -py3 -modern -safecstrings -I${CMAKE_CURRENT_SOURCE_DIR}/src)
+	swig_add_library(swid MODULE LANGUAGE python SOURCES ${CMAKE_SOURCE_DIR}/src/swig/swid.i)
+	swig_link_libraries(swid ${PYTHON_LIBRARY} swid)
 
-swig_add_library(swid MODULE LANGUAGE python SOURCES src/swig/swid.i)
-swig_link_libraries(swid ${PYTHON_LIBRARY} swid)
-
-target_include_directories(${SWIG_MODULE_swid_REAL_NAME} PUBLIC src ${PYTHON_INCLUDE_PATH} )
-
-
-###############################################################################
-## testing ####################################################################
-###############################################################################
-
-add_executable(unit_tests++ ${sources_test_cxx})
-add_executable(unit_tests ${sources_test_c})
-add_executable(resaver test/integration/resaver.cpp)
-
-# Don't include libswid as a library, use sources.
-# Not having explicit sources would destroy the coverage analysis.
-#
-# add_executable(unit_tests ${sources_test})
-# target_link_libraries(unit_tests PUBLIC swid)
-target_link_libraries(unit_tests++ PRIVATE swid)
-target_link_libraries(unit_tests PRIVATE swid)
-target_link_libraries(resaver PRIVATE swid)
-
-# This define is added to prevent collision with the main.
-# It might be better solved by not adding the source with the main to the
-# testing target.
-target_compile_definitions(unit_tests++ PUBLIC UNIT_TESTS)
-target_compile_definitions(unit_tests PUBLIC UNIT_TESTS)
-
-target_include_directories(unit_tests++ PUBLIC src)
-target_include_directories(unit_tests PUBLIC src)
-target_include_directories(resaver PUBLIC src)
-
-target_link_libraries(resaver PUBLIC ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
-
-
-add_executable(example-c++ docs/examples/report_creator_entity.cpp)
-target_link_libraries(example-c++ PUBLIC swid)
-
-add_executable(example-c docs/examples/report_creator_entity.c)
-target_link_libraries(example-c PUBLIC swid)
-
-
-include (CTest)
-
-set(CTEST_ENVIRONMENT "PYTHONPATH=.")
-
-add_test (NAME "Unit-C++" COMMAND unit_tests++)
-add_test (NAME "Unit-C" COMMAND unit_tests)
-
-set(SWID_VALIDATOR CACHE FILEPATH "Path to the swid validator .jar")
-
-add_test (NAME "python-bindings" COMMAND py.test-3 ${CMAKE_CURRENT_SOURCE_DIR}/test/unit/test.py)
-add_test (NAME "doc-examples" COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/integration/test-examples.sh "tinyxml.xml"
-	"./example-c++"
-	"./example-c"
-	"${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/report_creator_entity.py")
-
-if (SWID_VALIDATOR)
-add_test (NAME "resaving" COMMAND
-	${CMAKE_CURRENT_SOURCE_DIR}/test/integration/resave.sh
-	${SWID_VALIDATOR}
-	${CMAKE_CURRENT_SOURCE_DIR}/resources/samples/Vault/Enterprise_Vault_Server.swidtag
-	${CMAKE_CURRENT_SOURCE_DIR}/resources/samples/Vault/Enterprise_Vault.swidtag
-	${CMAKE_CURRENT_SOURCE_DIR}/resources/samples/Vault/Enterprise_Vault_Outlook_Add-in.swidtag
-)
+	target_include_directories(${SWIG_MODULE_swid_REAL_NAME} PUBLIC src ${PYTHON_INCLUDE_PATH} )
 endif()
 
+enable_testing()
+add_subdirectory("test")
 
-set_tests_properties("python-bindings" PROPERTIES ENVIRONMENT PYTHONPATH=.)
-set_tests_properties("doc-examples" PROPERTIES ENVIRONMENT PYTHONPATH=.)
-
-
-find_package(codecov)
 add_coverage(swid)
-add_coverage(unit_tests)
-add_coverage(unit_tests++)
 list(APPEND LCOV_REMOVE_PATTERNS "'/usr/*'")
-list(APPEND LCOV_REMOVE_PATTERNS "'${PROJECT_SOURCE_DIR}/test/*'")
+list(APPEND LCOV_REMOVE_PATTERNS "'${CMAKE_SOURCE_DIR}/test/*'")
 coverage_evaluate()
-
 
 ###############################################################################
 ## packaging ##################################################################
@@ -187,8 +120,8 @@ coverage_evaluate()
 # relative to the executable.
 install(TARGETS swid
 	LIBRARY DESTINATION lib)
-install(FILES src/include/libswid DESTINATION include)
-install(FILES src/libswid-base.h src/SWIDStruct.h DESTINATION include/swid)
+install(FILES ${CMAKE_SOURCE_DIR}/src/include/libswid DESTINATION include)
+install(FILES ${CMAKE_SOURCE_DIR}/src/libswid-base.h src/SWIDStruct.h DESTINATION include/swid)
 
 # Now comes everything we need, to create a package
 # there are a lot more variables you can set, and some
@@ -201,8 +134,8 @@ set(CPACK_PACKAGE_VERSION "0.0.1")
 set(CPACK_MONOLITHIC_INSTALL 1)
 
 SET(CPACK_PACKAGE_VENDOR "libswid upstream")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 
 # This must be last
 include(CPack)
