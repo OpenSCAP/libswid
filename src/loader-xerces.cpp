@@ -51,20 +51,33 @@ using std::map;
 // See also: https://stackoverflow.com/questions/9826518/purpose-of-xmlstringtranscode
 // and https://alfps.wordpress.com/2010/05/27/cppx-xerces-strings-simplified-by-ownership-part-i/#ownership
 // See https://stackoverflow.com/a/2897419/592892
+static XMLCh * create_str(const char * str) {
+	return XMLString::transcode(str);
+}
 
-#define X2(str) XStr(str).unicodeForm()
 
-#define Y(str) XMLString::transcode(str)
-#define X(str) XMLString::transcode(str)
-#define R(var) XMLString::release(& var)
+static char * create_str(const XMLCh * str) {
+	return XMLString::transcode(str);
+}
+
+
+static void destroy_str(XMLCh * str) {
+	XMLString::release(& str);
+}
+
+
+static void destroy_str(char * str) {
+	XMLString::release(& str);
+}
+
 
 // Taken from https://stackoverflow.com/a/2897419/592892
 static void OutputXML(DOMDocument * pmyDOMDocument, string filePath)
 {
-	auto * ls = X("LS");
+	auto * ls = create_str("LS");
 	//Return the first registered implementation that has the desired features. In this case, we are after a DOM implementation that has the LS feature... or Load/Save.
 	auto * implementation = DOMImplementationRegistry::getDOMImplementation(ls);
-	R(ls);
+	destroy_str(ls);
 
 	// Create a DOMLSSerializer which is used to serialize a DOM tree into an XML document.
 	auto * serializer = ((DOMImplementationLS*)implementation)->createLSSerializer();
@@ -73,17 +86,27 @@ static void OutputXML(DOMDocument * pmyDOMDocument, string filePath)
 	if (serializer->getDomConfig()->canSetParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true))
 		serializer->getDomConfig()->setParameter(XMLUni::fgDOMWRTFormatPrettyPrint, true);
 
-	auto * xml_endl = X("\n");
+	auto * xml_endl = create_str("\n");
 	// The end-of-line sequence of characters to be used in the XML being written out.
 	serializer->setNewLine(xml_endl);
 
+	destroy_str(xml_endl);
+
 	// Convert the path into Xerces compatible XMLCh*.
-	auto * tempFilePath = X(filePath.c_str());
+	auto * tempFilePath = create_str(filePath.c_str());
 
 	// Specify the target for the XML output.
-	auto * formatTarget = new LocalFileFormatTarget(tempFilePath);
+	LocalFileFormatTarget * formatTarget;
 
-	R(tempFilePath);
+	try {
+		// Can throw e.g. when the filename is invalid
+		formatTarget = new LocalFileFormatTarget(tempFilePath);
+	} catch (...) {
+		// Cleanup.
+		serializer->release();
+		destroy_str(tempFilePath);
+		throw;
+	}
 
 	// Create a new empty output destination object.
 	auto * output = ((DOMImplementationLS*)implementation)->createLSOutput();
@@ -95,12 +118,11 @@ static void OutputXML(DOMDocument * pmyDOMDocument, string filePath)
 	serializer->write(pmyDOMDocument, output);
 
 	// Cleanup.
-	serializer->release();
+	destroy_str(tempFilePath);
 
-	R(xml_endl);
-	delete formatTarget;
+	serializer->release();
 	output->release();
-	pmyDOMDocument->release();
+	delete formatTarget;
 }
 
 
@@ -116,12 +138,13 @@ XercesSWIDTagIO::XercesSWIDTagIO() {
 		XMLString::release(&message);
 		throw(msg.str());
 	}
-	parser = nullptr;
-	doc = nullptr;
+	shared_parser = nullptr;
+	shared_error_handler = nullptr;
+	shared_document = nullptr;
 
-	swid_ns = X(SWID_NS);
-	xmlch_entity = X("Entity");
-	xmlch_link = X("Link");
+	swid_ns = create_str(SWID_NS);
+	xmlch_entity = create_str("Entity");
+	xmlch_link = create_str("Link");
 
 	element_strings[SWID_ELEMENT_ENTITY] = xmlch_entity;
 	element_strings[SWID_ELEMENT_LINK] = xmlch_link;
@@ -129,34 +152,47 @@ XercesSWIDTagIO::XercesSWIDTagIO() {
 
 
 XercesSWIDTagIO::~XercesSWIDTagIO() {
-	if (parser != nullptr) {
-		deleteParser();
-	}
-
-	R(xmlch_link);
-	R(xmlch_entity);
-	R(swid_ns);
+	destroy_str(xmlch_link);
+	destroy_str(xmlch_entity);
+	destroy_str(swid_ns);
 
 	XMLPlatformUtils::Terminate();
 }
 
 
 void XercesSWIDTagIO::deleteParser() {
-	delete parser;
-	parser = nullptr;
-	delete errHandler;
-	errHandler = nullptr;
+	delete shared_parser;
+	shared_parser = nullptr;
+	delete shared_error_handler;
+	shared_error_handler = nullptr;
 }
 
 
 void XercesSWIDTagIO::createParser() {
-	parser = new XercesDOMParser();
+	shared_parser = new XercesDOMParser();
 
-	parser->setValidationScheme(XercesDOMParser::Val_Always);
-	parser->setDoNamespaces(true);  // optional
+	shared_parser->setValidationScheme(XercesDOMParser::Val_Always);
+	shared_parser->setDoNamespaces(true);  // optional
 
-	errHandler = (ErrorHandler*) new HandlerBase();
-	parser->setErrorHandler(errHandler);
+	shared_error_handler = (ErrorHandler*) new HandlerBase();
+	shared_parser->setErrorHandler(shared_error_handler);
+}
+
+
+void XercesSWIDTagIO::createDocument() {
+	auto * xml_core = create_str("Core");
+	auto * implementation = DOMImplementationRegistry::getDOMImplementation(xml_core);
+
+	auto * xml_swid = create_str("SoftwareIdentity");
+	shared_document = implementation->createDocument(swid_ns, xml_swid, 0);
+	destroy_str(xml_swid);
+	destroy_str(xml_core);
+}
+
+
+void XercesSWIDTagIO::deleteDocument() {
+	delete shared_document;
+	shared_document = nullptr;
 }
 
 
@@ -174,9 +210,6 @@ std::map<int, std::vector<DOMElement *> > XercesSWIDTagIO::subElementsOf(DOMElem
 
 
 SWIDStruct XercesSWIDTagIO::load(const string & filename) {
-	if (parser != nullptr) {
-		deleteParser();
-	}
 	createParser();
 
 	SWIDStruct result;
@@ -198,81 +231,79 @@ SWIDStruct XercesSWIDTagIO::load(const string & filename) {
 
 
 void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what) {
+	createDocument();
 	try {
 		XMLIO::save(filename, what);
 	} catch (const XMLException & toCatch) {
-		auto message = XMLString::transcode(toCatch.getMessage());
-		throw create_save_error(filename, message);
+		deleteDocument();
+		auto message = create_str(toCatch.getMessage());
+		auto exception = create_save_error(filename, message);
+		destroy_str(message);
+		throw exception;
 	} catch (...) {
+		deleteDocument();
 		throw create_save_error(filename, "Unknown error.");
 	}
+	deleteDocument();
 }
 
 
 validity XercesSWIDTagIO::isXSDValid(const std::string & filename) {
-	if (parser != nullptr) {
-		deleteParser();
-	}
+	validity result = SWID_VALIDITY_VALID;
 	createParser();
 
-	parser->setValidationSchemaFullChecking(true);
-	parser->setExternalNoNamespaceSchemaLocation(SCHEMA_ABS_PATH);
+	shared_parser->setValidationSchemaFullChecking(true);
+	shared_parser->setExternalNoNamespaceSchemaLocation(SCHEMA_ABS_PATH);
 
-	parser->parse(filename.c_str());
-	if(parser->getErrorCount() != 0) {
-		return SWID_VALIDITY_INVALID;
+	shared_parser->parse(filename.c_str());
+	if(shared_parser->getErrorCount() != 0) {
+		result = SWID_VALIDITY_INVALID;
 	}
-	return SWID_VALIDITY_VALID;
+	deleteParser();
+	return result;
 }
 
 
 DOMElement * XercesSWIDTagIO::readRoot(const string & filename) {
-	parser->parse(filename.c_str());
-	doc = parser->getDocument();
+	shared_parser->parse(filename.c_str());
+	shared_document = shared_parser->getDocument();
 
-	return doc->getDocumentElement();
+	return shared_document->getDocumentElement();
 }
 
 
 DOMElement * XercesSWIDTagIO::createRoot() {
-	auto * xml_core = X("Core");
-	auto * implementation = DOMImplementationRegistry::getDOMImplementation(xml_core);
-
-	auto * xml_swid = X("SoftwareIdentity");
-	doc = implementation->createDocument(swid_ns, xml_swid, 0);
-	R(xml_swid);
-	R(xml_core);
-	return doc->getDocumentElement();
+	return shared_document->getDocumentElement();
 }
 
 
 void XercesSWIDTagIO::setAttrValue(DOMElement * el, const char * name, const string & value) {
-	auto * xml_name = X(name);
-	auto * xml_val = X(value.c_str());
+	auto * xml_name = create_str(name);
+	auto * xml_val = create_str(value.c_str());
 	el->setAttribute(xml_name, xml_val);
-	R(xml_val);
-	R(xml_name);
+	destroy_str(xml_val);
+	destroy_str(xml_name);
 }
 
 
 string XercesSWIDTagIO::extractAttrValue(DOMElement * el, const char * name) const {
-	auto * xml_name = X(name);
+	auto * xml_name = create_str(name);
 	auto * xml_val = el->getAttribute(xml_name);
-	const char * text_val = Y(xml_val);
+	const char * text_val = create_str(xml_val);
 	string ret(text_val);
 	delete text_val;
-	R(xml_name);
+	destroy_str(xml_name);
 	return ret;
 }
 
 
 DOMElement * XercesSWIDTagIO::createSubElement(DOMElement * pRoot, int element_type) {
-	auto * el = doc->createElementNS(swid_ns, element_strings[element_type]);
+	auto * el = shared_document->createElementNS(swid_ns, element_strings[element_type]);
 	pRoot->appendChild(el);
 	return el;
 }
 
 
 void XercesSWIDTagIO::saveToFile(const std::string & filename) {
-	OutputXML(doc, filename);
+	OutputXML(shared_document, filename);
 }
