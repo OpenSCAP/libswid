@@ -24,15 +24,15 @@ enum validity {SWID_VALIDITY_VALID, SWID_VALIDITY_INVALID, SWID_VALIDITY_UNKNOWN
 enum role_id {
 	SWID_ROLE_NONE = 0,
 	SWID_ROLE_AGGREGATOR
-		= 1 << 0,
+	= 1 << 0,
 	SWID_ROLE_DISTRIBUTOR
-		= 1 << 1,
+	= 1 << 1,
 	SWID_ROLE_LICENSOR
-		= 1 << 2,
+	= 1 << 2,
 	SWID_ROLE_SOFTWARE_CREATOR
-		= 1 << 3,
+	= 1 << 3,
 	SWID_ROLE_TAG_CREATOR
-		= 1 << 4
+	    = 1 << 4
 };
 
 

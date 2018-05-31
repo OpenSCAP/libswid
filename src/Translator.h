@@ -42,7 +42,7 @@ private:
 
 
 type_id determine_type_id(
-	 const char * corpus,  const char * patch,  const char * supplemental);
+    const char * corpus,  const char * patch,  const char * supplemental);
 
 void set_strings_to_match_type(const type_id & type,
-	std::string & corpus, std::string & patch, std::string & supplemental);
+                               std::string & corpus, std::string & patch, std::string & supplemental);

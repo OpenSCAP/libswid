@@ -23,17 +23,20 @@
 
 
 // Took from https://stackoverflow.com/a/1448478/592892
-role_id operator | (role_id a, role_id b) {
+role_id operator | (role_id a, role_id b)
+{
 	return static_cast<role_id>(static_cast<int>(a) | static_cast<int>(b));
 }
 
 
-role_id operator & (role_id a, role_id b) {
+role_id operator & (role_id a, role_id b)
+{
 	return static_cast<role_id>(static_cast<int>(a) & static_cast<int>(b));
 }
 
 
-void SWIDStruct::applyDefaults() {
+void SWIDStruct::applyDefaults()
+{
 	if (versionScheme.size() == 0) {
 		versionScheme = "multipartnumeric";
 	}

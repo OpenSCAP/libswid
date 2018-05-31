@@ -49,7 +49,8 @@ private:
 
 	void setAttrValue(xercesc::DOMElement * el, const char * name, const std::string & value) override;
 	std::string extractAttrValue(xercesc::DOMElement * el, const char * name) const override;
-	std::map<int, std::vector<xercesc::DOMElement *> > subElementsOf(xercesc::DOMElement * el) const override;
+	std::map<int, std::vector<xercesc::DOMElement *> > subElementsOf(xercesc::DOMElement * el) const
+	override;
 
 	xercesc::DOMElement * createRoot() override;
 	xercesc::DOMElement * readRoot(const std::string & filename) override;
