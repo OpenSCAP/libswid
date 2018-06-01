@@ -228,13 +228,12 @@ SWIDStruct XercesSWIDTagIO::load(const string & filename)
 	SWIDStruct result;
 	try {
 		result = XMLIO<DOMElement>::load(filename);
-	} catch (const XMLException & toCatch) {
+	} catch (const SAXException & exc) {
 		deleteParser();
-		auto message = XMLString::transcode(toCatch.getMessage());
-		throw create_read_error(filename, message);
-	} catch (...) {
-		deleteParser();
-		throw create_read_error(filename, "Unknown error.");
+		char * msg = create_str(exc.getMessage());
+		auto our_exception = create_read_error(filename, msg);
+		destroy_str(msg);
+		throw our_exception;
 	}
 
 	deleteParser();
@@ -251,12 +250,9 @@ void XercesSWIDTagIO::save(const string & filename, const SWIDStruct & what)
 	} catch (const XMLException & toCatch) {
 		deleteDocument();
 		auto message = create_str(toCatch.getMessage());
-		auto exception = create_save_error(filename, message);
+		auto our_exception = create_save_error(filename, message);
 		destroy_str(message);
-		throw exception;
-	} catch (...) {
-		deleteDocument();
-		throw create_save_error(filename, "Unknown error.");
+		throw our_exception;
 	}
 	deleteDocument();
 }
