@@ -28,6 +28,11 @@
 #include "SWIDStruct.h"
 
 
+#ifdef SWIG
+// Older versions of SWIG may be puzzled by the 'override' keyword
+#define override
+#endif
+
 
 class XMLIOError : public std::runtime_error
 {
@@ -37,10 +42,10 @@ public:
 };
 
 
-class SWIDTagIO
+class SWIDTagIOBase
 {
 public:
-	virtual ~SWIDTagIO();
+	virtual ~SWIDTagIOBase();
 
 	/**
 	 * Get a SWIDStruct instance from an XML file.
@@ -50,15 +55,26 @@ public:
 	 * Save a SWIDStruct instance to an XML file.
 	 */
 	virtual void save(const std::string & filename, const SWIDStruct & what) = 0;
+	/**
+	 * Assess schema validity of the file.
+	 */
+	virtual validity isXSDValid(const std::string & filename);
 };
 
 
-/**
- * Get pointer to a SWIDTagIO instance.
- *
- * Remember to free it using `delete`!
- *
- * Args:
- *  - type: The type string. May be one of "xerces", "tinyxml"
- */
-SWIDTagIO * get_swidtagio(const char * type);
+class SWIDTagIO : public SWIDTagIOBase
+{
+public:
+	SWIDTagIO();
+	virtual ~SWIDTagIO() override;
+
+	void setBackend(const std::string & backend_name);
+
+	SWIDStruct load(const std::string & filename) override;
+	void save(const std::string & filename, const SWIDStruct & what) override;
+	virtual validity isXSDValid(const std::string & filename) override;
+
+private:
+	std::string current_backend;
+	SWIDTagIOBase * backend;
+};

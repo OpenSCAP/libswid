@@ -17,7 +17,8 @@ if __name__ == "__main__":
     tag_data = swid.SWIDStruct()
     xml_backend = "xerces"
 
-    io = swid.get_swidtagio(xml_backend)
+    io = swid.SWIDTagIO()
+    io.setBackend(xml_backend)
     if not io:
         msg = ("Error getting XML backend '{}', try another one."
                .format(xml_backend))

@@ -38,18 +38,20 @@ const map<const char *, role_id> role_id_map = {
 };
 
 
-static void rtrim_string(string & str) {
+static void rtrim_string(string & str)
+{
 	str.erase(str.find_last_not_of(" \n\r\t") + 1);
 }
 
 
-Role::Role():role(SWID_ROLE_NONE) {
+Role::Role():role(SWID_ROLE_NONE)
+{
 }
 
 
-Role::Role(string desc):role(SWID_ROLE_NONE) {
-	for (auto it = role_id_map.begin(); it != role_id_map.end(); it++)
-	{
+Role::Role(string desc):role(SWID_ROLE_NONE)
+{
+	for (auto it = role_id_map.begin(); it != role_id_map.end(); it++) {
 		string regexp_text = "\\b";
 		regexp_text = it->first;
 		regexp_text += "\\b";
@@ -61,14 +63,15 @@ Role::Role(string desc):role(SWID_ROLE_NONE) {
 }
 
 
-Role::Role(role_id id): role(id) {
+Role::Role(role_id id): role(id)
+{
 }
 
 
-string Role::RoleAsString() const {
+string Role::roleAsString() const
+{
 	auto ret = string();
-	for (auto it = role_id_map.begin(); it != role_id_map.end(); it++)
-	{
+	for (auto it = role_id_map.begin(); it != role_id_map.end(); it++) {
 		if (role & it->second) {
 			ret += it->first;
 			ret += " ";
@@ -80,7 +83,8 @@ string Role::RoleAsString() const {
 }
 
 
-role_id Role::RoleAsId() const {
+role_id Role::roleAsId() const
+{
 	return role;
 }
 
@@ -89,7 +93,8 @@ const char * XML_TRUE = "true";
 const char * XML_FALSE = "false";
 
 
-static bool check_bool(const char * value) {
+static bool check_bool(const char * value)
+{
 	if (strcmp(XML_TRUE, value) == 0) {
 		return true;
 	}
@@ -97,7 +102,8 @@ static bool check_bool(const char * value) {
 }
 
 
-type_id determine_type_id(const char * corpus, const char * patch, const char * supplemental) {
+type_id determine_type_id(const char * corpus, const char * patch, const char * supplemental)
+{
 	type_id type = SWID_TYPE_PRIMARY;
 	if (check_bool(corpus)) {
 		type = SWID_TYPE_CORPUS;
@@ -110,7 +116,9 @@ type_id determine_type_id(const char * corpus, const char * patch, const char * 
 }
 
 
-void set_strings_to_match_type(const type_id & type, string & corpus, string & patch, string & supplemental) {
+void set_strings_to_match_type(const type_id & type, string & corpus, string & patch,
+                               string & supplemental)
+{
 	corpus = XML_FALSE;
 	patch = XML_FALSE;
 	supplemental = XML_FALSE;

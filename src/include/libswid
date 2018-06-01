@@ -21,4 +21,4 @@
  */
 #pragma once
 
-#include <swid/lib.h>
+#include <swid/libswid-base.h>

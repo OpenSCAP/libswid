@@ -10,9 +10,12 @@
 %template(links_vector) std::vector<SWIDLink>;
 %template(entities_vector) std::vector<SWIDEntity>;
 
-%newobject get_swidtagio;
+
+%catches (std::runtime_error) SWIDTagIO::setBackend;
+%catches (XMLIOError, std::runtime_error) SWIDTagIO::load;
+%catches (XMLIOError, std::runtime_error) SWIDTagIO::save;
 
 /* Can't use -includeall because it would include STL include files */
-%include <lib.h>
+%include <libswid-base.h>
 %include <SWIDStruct.h>
 %include <swid-common.h>

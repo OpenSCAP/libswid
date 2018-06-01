@@ -23,12 +23,14 @@
 #include "Translator.h"
 
 template<class el_t>
-XMLIO<el_t>::~XMLIO() {
+XMLIO<el_t>::~XMLIO()
+{
 }
 
 
 template<class el_t>
-SWIDStruct XMLIO<el_t>::load(const std::string & filename) {
+SWIDStruct XMLIO<el_t>::load(const std::string & filename)
+{
 	el_t * pRoot = readRoot(filename);
 
 	auto ret = SWIDStruct();
@@ -40,9 +42,9 @@ SWIDStruct XMLIO<el_t>::load(const std::string & filename) {
 	ret.xml_lang = extractAttrValue(pRoot, "xml:lang");
 
 	ret.type = determine_type_id(
-		extractAttrValue(pRoot, "corpus").c_str(),
-		extractAttrValue(pRoot, "patch").c_str(),
-		extractAttrValue(pRoot, "supplemental").c_str());
+	               extractAttrValue(pRoot, "corpus").c_str(),
+	               extractAttrValue(pRoot, "patch").c_str(),
+	               extractAttrValue(pRoot, "supplemental").c_str());
 
 	auto subelements = subElementsOf(pRoot);
 
@@ -59,21 +61,23 @@ SWIDStruct XMLIO<el_t>::load(const std::string & filename) {
 
 
 template<class el_t>
-void XMLIO<el_t>::addEntities(SWIDStruct & subject, const std::vector<el_t *> & entities) {
+void XMLIO<el_t>::addEntities(SWIDStruct & subject, const std::vector<el_t *> & entities)
+{
 	std::string role;
 	for (auto it = entities.begin(); it != entities.end(); it++) {
 		auto entity = SWIDEntity();
 		entity.name = extractAttrValue(* it, "name");
 		entity.regid = extractAttrValue(* it, "regid");
 		role = extractAttrValue(* it, "role");
-		entity.role = Role(role).RoleAsId();
+		entity.role = Role(role).roleAsId();
 		subject.entities.push_back(entity);
 	}
 }
 
 
 template<class el_t>
-void XMLIO<el_t>::addLinks(SWIDStruct & subject, const std::vector<el_t *> & links) {
+void XMLIO<el_t>::addLinks(SWIDStruct & subject, const std::vector<el_t *> & links)
+{
 	for (auto it = links.begin(); it != links.end(); it++) {
 		auto link = SWIDLink();
 		link.href = extractAttrValue(* it, "href");
@@ -84,7 +88,8 @@ void XMLIO<el_t>::addLinks(SWIDStruct & subject, const std::vector<el_t *> & lin
 
 
 template<class el_t>
-void XMLIO<el_t>::save(const std::string & filename, const SWIDStruct & what) {
+void XMLIO<el_t>::save(const std::string & filename, const SWIDStruct & what)
+{
 	el_t * pRoot = createRoot();
 
 	setAttrValue(pRoot, "name", what.name);
@@ -103,7 +108,7 @@ void XMLIO<el_t>::save(const std::string & filename, const SWIDStruct & what) {
 		el_t * el = createSubElement(pRoot, SWID_ELEMENT_ENTITY);
 		setAttrValue(el, "name", it->name);
 		setAttrValue(el, "regid", it->regid);
-		setAttrValue(el, "role", Role(it->role).RoleAsString());
+		setAttrValue(el, "role", Role(it->role).roleAsString());
 	}
 
 	for (auto it = what.links.begin(); it != what.links.end(); it++) {
@@ -116,7 +121,8 @@ void XMLIO<el_t>::save(const std::string & filename, const SWIDStruct & what) {
 
 
 template<class el_t>
-std::map<int, std::vector<el_t *> > XMLIO<el_t>::createEmptyMap() const {
+std::map<int, std::vector<el_t *> > XMLIO<el_t>::createEmptyMap() const
+{
 	std::map<int, std::vector<el_t *> > result;
 	for (int i = 0; i < TOTAL_SWID_ELEMENT_COUNT; i++) {
 		result[i] = std::vector<el_t *>();
