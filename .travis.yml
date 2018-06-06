@@ -11,10 +11,11 @@ script:
  - export CC=gcc-6
  - export CXX=g++-6
  - export GCOV=gcov-6
- - cmake -DENABLE_COVERAGE=yes . && build-wrapper-linux-x86-64 --out-dir bw-output make clean all || true
+ - cmake -DENABLE_COVERAGE=yes .
+ - build-wrapper-linux-x86-64 --out-dir bw-output make clean all || true  # may fail in builds from forks
  - make && ctest -V
  - make gcov
- - sonar-scanner || true
+ - sonar-scanner || true  # may fail in builds from forks
 
 after_success:
  - curl -s https://codecov.io/bash > cov.sh && bash cov.sh -x "$GCOV"

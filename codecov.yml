@@ -8,11 +8,9 @@ coverage:
         threshold: 2%
     patch:
       default:
-        target: 80%
+        threshold: 2%
   ignore:
     - "test/"
 
 comment:
-  layout: "header, diff"
-  require_changes: false
   behavior: default
