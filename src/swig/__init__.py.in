@@ -1,0 +1,4 @@
+from .swid_api import *
+
+
+version = "${VERSION_FULL}"

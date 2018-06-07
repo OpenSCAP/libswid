@@ -1,4 +1,4 @@
-%module swid
+%module swid_api
 %{
 #include <libswid>
 %}
