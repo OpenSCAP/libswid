@@ -11,7 +11,7 @@
 %template(entities_vector) std::vector<SWIDEntity>;
 
 
-%catches (std::runtime_error) SWIDTagIO::setBackend;
+%catches (XMLIOBackendError, std::runtime_error) SWIDTagIO::setBackend;
 %catches (XMLIOError, std::runtime_error) SWIDTagIO::load;
 %catches (XMLIOError, std::runtime_error) SWIDTagIO::save;
 

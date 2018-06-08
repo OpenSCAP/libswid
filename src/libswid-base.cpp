@@ -49,6 +49,16 @@ XMLIOError::XMLIOError(const char * what_arg):std::runtime_error(what_arg)
 }
 
 
+XMLIOBackendError::XMLIOBackendError(const std::string & what_arg):std::runtime_error(what_arg)
+{
+}
+
+
+XMLIOBackendError::XMLIOBackendError(const char * what_arg):std::runtime_error(what_arg)
+{
+}
+
+
 SWIDTagIOBase::~SWIDTagIOBase()
 {
 }
@@ -68,10 +78,10 @@ static SWIDTagIOBase * get_swidtagio(const char * type)
 	} else if (strcmp(type, "xerces") == 0) {
 		ret = NEW_XERCES_IO;
 	} else {
-		throw std::runtime_error("Backend not known");
+		throw XMLIOBackendError("Backend not known.");
 	}
 	if (ret == nullptr) {
-		throw std::runtime_error("Backend known, but not supported.");
+		throw XMLIOBackendError("Backend known, but not supported.");
 	}
 	return ret;
 }
@@ -98,12 +108,12 @@ void SWIDTagIO::setBackend(const std::string & backend_name)
 	}
 	try {
 		backend = get_swidtagio(backend_name.c_str());
-	} catch (const std::runtime_error & exc) {
+	} catch (const XMLIOBackendError & exc) {
 		std::ostringstream msg;
 		msg << "Unable to set backend to '"
 		    << backend_name << "': "
-		    << exc.what() << ".\n";
-		throw std::runtime_error(msg.str());
+		    << exc.what() << "\n";
+		throw XMLIOBackendError(msg.str());
 	}
 	current_backend = backend_name;
 }
@@ -112,7 +122,7 @@ void SWIDTagIO::setBackend(const std::string & backend_name)
 SWIDStruct SWIDTagIO::load(const std::string & filename)
 {
 	if (backend == nullptr) {
-		throw std::runtime_error("No backend has been set, call setBackend first.");
+		throw XMLIOBackendError("No backend has been set, call setBackend first.");
 	}
 	return backend->load(filename);
 }
@@ -121,7 +131,7 @@ SWIDStruct SWIDTagIO::load(const std::string & filename)
 void SWIDTagIO::save(const std::string & filename, const SWIDStruct & what)
 {
 	if (backend == nullptr) {
-		throw std::runtime_error("No backend has been set, call setBackend first.");
+		throw XMLIOBackendError("No backend has been set, call setBackend first.");
 	}
 	return backend->save(filename, what);
 }
