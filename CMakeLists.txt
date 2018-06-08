@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.0) # setting this is required
 project(libswid)
 
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 0)
+set(VERSION_PATCH 1)
+set(VERSION_FULL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+
 ###############################################################################
 ## file globbing ##############################################################
 ###############################################################################
@@ -83,7 +88,10 @@ target_sources(swid PUBLIC ${public_sources} PRIVATE ${private_sources})
 
 # target_link_libraries(swid-util swid)
 
-target_compile_options(swid PUBLIC -std=c++11 -Wall)
+set_property(TARGET swid PROPERTY CXX_STANDARD 11)
+set_property(TARGET swid PROPERTY CXX_STANDARD_REQUIRED ON)
+
+target_compile_options(swid PUBLIC -Wall)
 
 target_include_directories(swid PUBLIC src ${XercesC_INCLUDE_DIRS} ${TinyXML_INCLUDE_DIRS})
 target_link_libraries(swid ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
@@ -92,20 +100,11 @@ target_link_libraries(swid ${XercesC_LIBRARIES} ${TinyXML_LIBRARIES})
 # We need this, because we want to work with paths relative to the executable.
 file(COPY ${data} DESTINATION resources)
 
-if (BUILD_PYTHON_BINDINGS)
-	include(${SWIG_USE_FILE})
-
-	set_property(SOURCE ${CMAKE_SOURCE_DIR}/src/swig/swid.i PROPERTY CPLUSPLUS ON)
-	set_property(SOURCE ${CMAKE_SOURCE_DIR}/src/swig/swid.i PROPERTY SWIG_FLAGS -py3 -modern -safecstrings -I${CMAKE_SOURCE_DIR}/src)
-
-	swig_add_library(swid MODULE LANGUAGE python SOURCES ${CMAKE_SOURCE_DIR}/src/swig/swid.i)
-	swig_link_libraries(swid ${PYTHON_LIBRARY} swid)
-
-	target_include_directories(${SWIG_MODULE_swid_REAL_NAME} PUBLIC src ${PYTHON_INCLUDE_PATH} )
-endif()
-
 enable_testing()
 add_subdirectory("test")
+
+# Python bindings - put everything to a 'swid' package directory
+add_subdirectory("src/swig"  "swid")
 
 add_coverage(swid)
 list(APPEND LCOV_REMOVE_PATTERNS "'/usr/*'")
@@ -128,7 +127,7 @@ install(FILES ${CMAKE_SOURCE_DIR}/src/libswid-base.h src/SWIDStruct.h DESTINATIO
 # you need to set for some package types, but we want to
 # be minimal here.
 set(CPACK_PACKAGE_NAME "libSWID")
-set(CPACK_PACKAGE_VERSION "0.0.1")
+set(CPACK_PACKAGE_VERSION "${VERSION_FULL}")
 
 # We don't want to split our program up into several incomplete pieces.
 set(CPACK_MONOLITHIC_INSTALL 1)
@@ -136,6 +135,7 @@ set(CPACK_MONOLITHIC_INSTALL 1)
 SET(CPACK_PACKAGE_VENDOR "libswid upstream")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_SOURCE_IGNORE_FILES "^\\\\..*;sonar-project.properties;codecov.yml")
 
 # This must be last
 include(CPack)

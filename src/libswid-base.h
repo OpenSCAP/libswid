@@ -42,6 +42,14 @@ public:
 };
 
 
+class XMLIOBackendError : public std::runtime_error
+{
+public:
+	explicit XMLIOBackendError(const std::string & what_arg);
+	explicit XMLIOBackendError(const char * what_arg);
+};
+
+
 class SWIDTagIOBase
 {
 public:

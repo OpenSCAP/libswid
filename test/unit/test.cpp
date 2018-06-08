@@ -40,6 +40,30 @@ TEST_CASE( "Utilities" ) {
 		REQUIRE( (Role("softwareCreator tagCreator").roleAsId() & real_role) == real_role );
 	}
 
+	SECTION("Backends") {
+		SWIDTagIO loader;
+		CHECK_THROWS( loader.setBackend("trololol") );
+		try {
+			loader.setBackend("trololol");
+			REQUIRE( false );
+		} catch (const XMLIOBackendError & toCatch) {
+			REQUIRE(regex_search(toCatch.what(),
+				regex("trololol.*not known\\.")));
+		} catch (...) {
+			REQUIRE( false );
+		}
+
+		CHECK_THROWS( loader.load("") );
+		try {
+			loader.load("");
+			REQUIRE( false );
+		} catch (const XMLIOBackendError & toCatch) {
+			REQUIRE(regex_search(toCatch.what(),
+				regex("[Nn]o backend has been set")));
+		} catch (...) {
+			REQUIRE( false );
+		}
+	}
 }
 
 
@@ -153,7 +177,11 @@ void check(string parser_name) {
 
 
 TEST_CASE( "Basic I/O", "[parsers]" ) {
+#ifdef HAVE_TINYXML
 	check("tinyxml");
+#endif
+#ifdef HAVE_XERCES
 	check("xerces");
+#endif
 }
 

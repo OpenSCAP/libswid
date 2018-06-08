@@ -37,8 +37,17 @@ You can use ``libswid`` from other languages besides ``C++``.
 Python
 ++++++
 
-You need SWIG to build the Python bindings.
-Then, you just import the ``swid`` module, that mimicks the ``C++`` interface:
+You need SWIG and Python3 to build the Python bindings.
+If you want to build them, make sure you have
+
+* Python3 development files, and
+* SWIG>=3
+
+During the ``cmake`` pass, you should see the ``Building Python 3 bindings: ON`` message.
+In that case, the build directory will contain the ``swid`` package and ``setup.py`` file.
+
+You can install that package as any other Python package.
+The compiled binary extension will be shipped as package data.
 
 .. literalinclude:: examples/report_creator_entity.py
    :language: Python
